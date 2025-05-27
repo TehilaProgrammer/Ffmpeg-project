@@ -51,19 +51,23 @@ router.post("/api/convert", upload.fields([
       segment_name: req.body.segment_name,
       hls_time: parseInt(req.body.hls_time),
     };
-    
+
+    if (!fs.existsSync(ffmpegParams.output_folder)) {
+      fs.mkdirSync(ffmpegParams.output_folder, { recursive: true });
+    }
+
     console.log("----------------------------------------------------------\n", ffmpegParams);
 
-    
     const args = generateFfmpegCommand(ffmpegParams);
     sendStatus(sessionId, "uploading ZIP");
 
-    runFfmpegCommand(args, () => {
+    runFfmpegCommand(args, ffmpegParams.output_folder, () => {
       sendStatus(sessionId, "done");
+      const zipName = `${path.basename(ffmpegParams.output_folder)}.zip`;
       res.json({
         status: "done",
         message: "FFmpeg completed and ZIP created",
-        downloadUrl: "/output/output.zip",
+        downloadUrl: `/output/${path.basename(ffmpegParams.output_folder)}/${zipName}`
       });
     });
 

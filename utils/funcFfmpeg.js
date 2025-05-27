@@ -4,7 +4,35 @@ const archiver = require('archiver');
 const path = require('path');
 
 function generateFfmpegCommand(data) {
+  const filePath = path.join(__dirname, 'last_used_data.json');
+  let existingData = [];
+
+  if (fs.existsSync(filePath)) {
+    try {
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      existingData = JSON.parse(fileContent);
+      if (!Array.isArray(existingData)) {
+        existingData = [];
+      }
+    } catch (err) {
+      console.error("error json:", err);
+      existingData = [];
+    }
+  }
+
+  existingData.push(data);
+
+  fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf8');
+
   console.log("Got data in generateFfmpegCommand:", data);
+
+  // fs.writeFileSync(
+  //   path.join(__dirname, 'last_used_data.json'),
+  //   JSON.stringify(data, null, 2),
+  //   'utf8'
+  // );
+  
+  // console.log("Got data in generateFfmpegCommand:", data);
 
   const {
     input_video_url,
@@ -71,7 +99,7 @@ function generateFfmpegCommand(data) {
   return args;
 }
 
-function runFfmpegCommand(args, callback) {
+function runFfmpegCommand(args, outputFolder, callback) {
   const ffmpeg = spawn('ffmpeg', args, { shell: true });
 
   ffmpeg.stdout.on('data', (data) => {
@@ -84,8 +112,10 @@ function runFfmpegCommand(args, callback) {
 
   ffmpeg.on('close', (code) => {
     console.log(`✅ FFmpeg process exited with code ${code}`);
-    
-    const output = fs.createWriteStream("public/output/output.zip");
+
+    const folderName = path.basename(outputFolder);
+    const zipPath = path.join(outputFolder, `${folderName}.zip`);
+    const output = fs.createWriteStream(zipPath);
     const archive = archiver("zip", { zlib: { level: 9 } });
 
     output.on("close", () => {
@@ -98,7 +128,7 @@ function runFfmpegCommand(args, callback) {
     });
 
     archive.pipe(output);
-    archive.directory("public/output/", false);
+    archive.directory(outputFolder, false);
     archive.finalize();
   });
 }

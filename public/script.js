@@ -1,11 +1,11 @@
 let showFileInput = true;
 let showPathInput = false;
-//--------
+
 const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
 const eventSource = new EventSource(`/api/status?sessionId=${sessionId}`);
 eventSource.onmessage = function (event) {
   const data = JSON.parse(event.data);
-  console.log('Status update:', data);  // Add logging to help debug
+  console.log('Status update:', data);  
   document.getElementById("outputJson").textContent = JSON.stringify(data, null, 2);
 
   if (data.status === "done" && data.downloadUrl) {
@@ -15,7 +15,6 @@ eventSource.onmessage = function (event) {
   }
 };
 
-// Add error handling
 eventSource.onerror = function(error) {
   console.error('EventSource error:', error);
   eventSource.close();
@@ -62,7 +61,17 @@ document.getElementById("ffmpegForm").addEventListener("submit", function (e) {
     formData.append("inputPath", inputPathVideo);
   }
 
-  formData.append("output_folder", "public/output");
+const now = new Date();
+const timestampFolder =
+  "output_" +
+  now.getFullYear() + "-" +
+  String(now.getMonth() + 1).padStart(2, "0") + "-" +
+  String(now.getDate()).padStart(2, "0") + "_" +
+  String(now.getHours()).padStart(2, "0") + "-" +
+  String(now.getMinutes()).padStart(2, "0") + "-" +
+  String(now.getSeconds()).padStart(2, "0");
+
+formData.append("output_folder", `public/output/${timestampFolder}`);
   formData.append("adVolume", document.getElementById("adVolume").value);
   formData.append("fps", document.getElementById("fps").value);
   formData.append("bitrate", document.getElementById("bitrate").value + "k");
@@ -72,7 +81,6 @@ document.getElementById("ffmpegForm").addEventListener("submit", function (e) {
   formData.append("playlist_name", document.getElementById("playlistName").value + ".m3u8");
   formData.append("segment_name", document.getElementById("segmentName").value + "_%03d.ts");
   formData.append("hls_time", document.getElementById("hlsTime").value);
-  //--------
   formData.append("sessionId", sessionId);
 
 

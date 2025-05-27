@@ -11,3 +11,5 @@ package-lock.json
 # uploads or temp files
 uploads/
 tmp/
+/public/OUTPUT/*
+!/public/OUTPUT/.gitignore

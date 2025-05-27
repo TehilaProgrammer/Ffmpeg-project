@@ -1,0 +1,28 @@
+[
+  {
+    "input_video_url": "C:\\Users\\user1\\Documents\\practicum\\example code-generateFfmpegCommans\\uploads\\6064d41c020cff0bda02567c5b7ad445",
+    "output_folder": "public/output/output_2025-05-27_13-02-15",
+    "adVolume": -21,
+    "fps": 25,
+    "bitrate": "2000k",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "preset": "veryfast",
+    "playlist_name": "my-video.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": 4
+  },
+  {
+    "input_video_url": "C:\\Users\\user1\\Documents\\practicum\\example code-generateFfmpegCommans\\uploads\\8d55da88fe6de3c4258e89c363f95bd2",
+    "output_folder": "public/output/output_2025-05-27_13-03-34",
+    "adVolume": -21,
+    "fps": 25,
+    "bitrate": "2000k",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "preset": "veryfast",
+    "playlist_name": "my-video.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": 4
+  }
+]
