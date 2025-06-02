@@ -67,10 +67,11 @@ router.post("/api/convert", upload.fields([
       res.json({
         status: "done",
         message: "FFmpeg completed and ZIP created",
-        downloadUrl: `/output/${path.basename(ffmpegParams.output_folder)}/${zipName}`
+        downloadUrl: `/output/${path.basename(ffmpegParams.output_folder)}/${zipName}`,
+        playlistUrl: `/output/${path.basename(ffmpegParams.output_folder)}/${ffmpegParams.playlist_name}`
       });
+      console.log(" Sending playlist URL:", `/output/${path.basename(ffmpegParams.output_folder)}/${ffmpegParams.playlist_name}`);
     });
-
   } catch (error) {
     console.error(error);
     if (sessionId) {

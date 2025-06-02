@@ -6,13 +6,46 @@ const eventSource = new EventSource(`/api/status?sessionId=${sessionId}`);
 eventSource.onmessage = function (event) {
   const data = JSON.parse(event.data);
   console.log('Status update:', data);  
+  console.log("🔍 Full data object:", data);
   document.getElementById("outputJson").textContent = JSON.stringify(data, null, 2);
 
-  if (data.status === "done" && data.downloadUrl) {
-    const downloadBtn = document.getElementById("downloadZip");
-    downloadBtn.href = data.downloadUrl;
-    downloadBtn.style.display = "block";
-  }
+  if (data.status === "done") {
+    const playlistPath = data.playlistUrl;
+    if (data.downloadUrl) {
+      const downloadBtn = document.getElementById("downloadZip");
+      downloadBtn.href = data.downloadUrl;
+      downloadBtn.style.display = "block";
+    }
+  
+    if (playlistPath) {
+      const videoContainer = document.getElementById("videoContainer");
+      const video = document.getElementById("videoPlayer");
+  
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(playlistPath);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        });
+        video.addEventListener("error", function (e) {
+          console.error("Video error (HLS supported):", e);
+          printVideoError(video);
+        });
+        
+      } 
+      else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = playlistPath;
+        video.addEventListener("loadedmetadata", function () {
+        });
+        video.addEventListener("error", function (e) {
+          console.error("Video error (native HLS):", e);
+          printVideoError(video);
+        });
+      }
+  
+      videoContainer.style.display = "block";
+    }
+  }  
 };
 
 eventSource.onerror = function(error) {
@@ -96,6 +129,29 @@ formData.append("output_folder", `public/output/${timestampFolder}`);
         const downloadBtn = document.getElementById("downloadZip");
         downloadBtn.href = data.downloadUrl;
         downloadBtn.style.display = "block";
+      }
+      document.getElementById("ffmpegForm").style.display = "none";
+
+      if (data.playlistUrl) {
+        const videoContainer = document.getElementById("videoContainer");
+        const video = document.getElementById("videoPlayer");
+
+        const fullPath = window.location.origin + data.playlistUrl;
+        console.log("Trying to play (immediate):", fullPath);
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(fullPath);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {         
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = fullPath;
+          video.addEventListener("loadedmetadata", function () {
+          });
+        }
+
+        videoContainer.style.display = "block";
       }
     })
     .catch(error => {

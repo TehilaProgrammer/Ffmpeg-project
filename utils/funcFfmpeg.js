@@ -26,14 +26,6 @@ function generateFfmpegCommand(data) {
 
   console.log("Got data in generateFfmpegCommand:", data);
 
-  // fs.writeFileSync(
-  //   path.join(__dirname, 'last_used_data.json'),
-  //   JSON.stringify(data, null, 2),
-  //   'utf8'
-  // );
-  
-  // console.log("Got data in generateFfmpegCommand:", data);
-
   const {
     input_video_url,
     output_folder,

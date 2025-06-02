@@ -5,8 +5,7 @@
   <meta charset="UTF-8">
   <title>FFmpeg Parameters</title>
   <link rel="icon" href="images/icon.png" type="image/png">
-
-
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <style>
     * {
@@ -86,7 +85,7 @@
       font-weight: bold;
       cursor: pointer;
       transition: background-color 0.3s;
-      margin-top: 28px;
+      margin-top: 20px;
       width: 38%;
       margin-left: 1vh;
       margin-right: 1vh;
@@ -183,11 +182,12 @@
 </head>
 
 <body>
-
+  <main>
   <h2>Video encoding settings (FFmpeg)</h2>
 
   <form id="ffmpegForm">
-    <label>Input video file:
+    <label >
+      <div style="text-align: center; font-weight: bold; margin-bottom: 0px; font-size: 2vh;">Input video file</div>
       <button type="button" id="chooseFileBtn"> choose video file </button>
       <div id="fileInputSection" style="display: block;">
         <input type="file" id="inputFileVideo" />
@@ -252,11 +252,18 @@
 
   </form>
 
+  <div id="videoContainer" style="display:none; margin-top: 20px;">
+    <video id="videoPlayer" controls width="50%" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" poster="/images/ffmpegImage.jpg">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
   <button >
     <a id="downloadZip" style="display: none;" href="#"  download>⬇️ download ZIP</a>
   </button>
 
   <pre id="outputJson"></pre>
+</main>
 
   <script src="script.js"></script>
 </body>
