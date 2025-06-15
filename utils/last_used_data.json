@@ -206,5 +206,75 @@
     "playlist_name": "my-video.m3u8",
     "segment_name": "segment_%03d.ts",
     "hls_time": 4
+  },
+  {
+    "input_video_url": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/output_2025-06-09_12-30-41",
+    "adVolume": -28,
+    "fps": 30,
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": 6,
+    "hls_list_size": 0
+  },
+  {
+    "input_video_url": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/output_2025-06-09_12-51-18",
+    "adVolume": -28,
+    "fps": 30,
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": 6,
+    "hls_list_size": 0
+  },
+  {
+    "input_video_url": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/output_2025-06-09_12-52-29",
+    "adVolume": -28,
+    "fps": 30,
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": 6,
+    "hls_list_size": 0
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-10T09_40_51_384Z",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1749548286491uz26izgrs",
+    "profiles": [
+      {
+        "resolution": "1024x576",
+        "fps": "25",
+        "bitrate": "1707k",
+        "maxrate": "1707k",
+        "bufsize": "1707k",
+        "profile": "Main",
+        "level": "4.0",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
   }
 ]

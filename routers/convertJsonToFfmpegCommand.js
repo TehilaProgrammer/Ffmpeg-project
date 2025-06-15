@@ -1,84 +1,50 @@
 const express = require("express");
-const multer = require("multer");
 const path = require("path");
 const router = express.Router();
-const { generateFfmpegCommand, runFfmpegCommand } = require("../utils/funcFfmpeg");
+const { generateFfmpegCommand, runFfmpegCommand, ensureVariantFolders } = require("../utils/funcFfmpeg");
 const { sendStatus } = require("../utils/statusManager");
 const fs = require('fs');
-const upload = multer({ dest: "uploads/" });
 
-router.post("/api/convert", upload.fields([
-  { name: "inputVideo", maxCount: 1 },
-  { name: "inputPath", maxCount: 1 }
-]), async (req, res) => {
+router.post('/api/convert', express.json(), async (req, res) => {
   try {
-    const sessionId = req.body.sessionId;
-    if (!sessionId) {
-      return res.status(400).json({ error: "Session ID is required" });
+    const config = req.body;
+    console.log("config", config);
+    if (!config.inputPath || !config.output_folder || !config.profiles) {
+      return res.status(400).json({ error: 'Missing required parameters in JSON' });
     }
-
-    if (!req.files?.inputVideo && !req.body.inputPath) {
-      return res.status(400).json({ error: "No input video provided" });
+    ensureVariantFolders(config.output_folder, config.sessionId, config.profiles);
+    // Create output directory if it doesn't exist
+    if (!fs.existsSync(config.output_folder)) {
+      fs.mkdirSync(config.output_folder, { recursive: true });
     }
+    const ffmpegArgs = generateFfmpegCommand(config);
+    // Use the base output folder for zip creation, not the session-specific folder
+    const baseOutputPath = config.output_folder;
 
-    if (req.body.inputPath) {
-      const fullPath = req.body.inputPath;
-      if (fullPath.startsWith('http://') || fullPath.startsWith('https://')) {
-      } else {
-        if (!fs.existsSync(fullPath)) {
-          return res.status(400).json({ error: 'The local path does not exist on server' });
-        }
+    runFfmpegCommand(ffmpegArgs, baseOutputPath, (err, zipPath) => {
+      if (err) {
+        console.error('Error creating zip:', err);
+        sendStatus(config.sessionId, "error: " + err.message);
+        return res.status(500).json({ error: 'Failed to create zip file' });
       }
-    }
-
-    sendStatus(sessionId, "processing...");// Get the correct input path based on whether it's a file upload or URL/path
-    const fullInputPath = req.files?.inputVideo ?
-      path.resolve(req.files.inputVideo[0].path) :
-      req.body.inputPath;
-
-    console.log('Processing input:', fullInputPath);
-
-    const ffmpegParams = {
-      input_video_url: fullInputPath,
-      output_folder: req.body.output_folder,
-      adVolume: parseFloat(req.body.adVolume),
-      fps: parseInt(req.body.fps),
-      bitrate: req.body.bitrate,
-      audio_rate: req.body.audio_rate,
-      audio_bitrate: req.body.audio_bitrate,
-      preset: req.body.preset,
-      playlist_name: req.body.playlist_name,
-      segment_name: req.body.segment_name,
-      hls_time: parseInt(req.body.hls_time),
-    };
-
-    if (!fs.existsSync(ffmpegParams.output_folder)) {
-      fs.mkdirSync(ffmpegParams.output_folder, { recursive: true });
-    }
-
-    console.log("----------------------------------------------------------\n", ffmpegParams);
-
-    const args = generateFfmpegCommand(ffmpegParams);
-    sendStatus(sessionId, "uploading ZIP");
-
-    runFfmpegCommand(args, ffmpegParams.output_folder, () => {
-      sendStatus(sessionId, "done");
-      const zipName = `${path.basename(ffmpegParams.output_folder)}.zip`;
+      
+      sendStatus(config.sessionId, "done");
+      // Get the relative path from public directory
+      const relativeZipPath = path.relative(path.join(__dirname, '..', 'public'), zipPath);
       res.json({
         status: "done",
         message: "FFmpeg completed and ZIP created",
-        downloadUrl: `/output/${path.basename(ffmpegParams.output_folder)}/${zipName}`,
-        playlistUrl: `/output/${path.basename(ffmpegParams.output_folder)}/${ffmpegParams.playlist_name}`
+        downloadUrl: '/' + relativeZipPath.replace(/\\/g, '/'),
+        playlistUrl: `/output/${path.basename(config.output_folder)}/${config.sessionId}-master.m3u8`
       });
-      console.log(" Sending playlist URL:", `/output/${path.basename(ffmpegParams.output_folder)}/${ffmpegParams.playlist_name}`);
     });
-  } catch (error) {
-    console.error(error);
-    if (sessionId) {
-      sendStatus(sessionId, "error: " + error.message);
+
+  } catch (err) {
+    console.error('Conversion error:', err);
+    if (config.sessionId) {
+      sendStatus(config.sessionId, "error: " + err.message);
     }
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Conversion failed' });
   }
 });
-
 module.exports = router;

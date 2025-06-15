@@ -1,26 +1,22 @@
 <!DOCTYPE html>
-<html lang="he">
-
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>FFmpeg Parameters</title>
-  <link rel="icon" href="images/icon.png" type="image/png">
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./images/icon2.png">
+  <title>FFmpeg Stream Generator</title>
   <style>
     * {
       box-sizing: border-box;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      direction: rtl;
+      direction: ltr;
     }
-
     body {
       background-color: #f2f4f3;
       color: #1e1e1e;
       margin: 0;
       padding: 0;
     }
-
     main {
       max-width: 700px;
       margin: 50px auto;
@@ -43,7 +39,6 @@
       flex-direction: column;
       align-items: center;
     }
-
     label {
       width: 100%;
       max-width: 420px;
@@ -53,7 +48,6 @@
       font-weight: 500;
       color: #2e2e2e;
     }
-
     input,
     select {
       width: 100%;
@@ -72,7 +66,6 @@
       box-shadow: 0 0 4px rgba(0, 124, 55, 0.3);
       outline: none;
     }
-
     #formButtons button,
     #formButtons,
     button {
@@ -90,8 +83,6 @@
       margin-left: 1vh;
       margin-right: 1vh;
     }
-
-
     #downloadZip {
       background-color: #007c37;
       color: white;
@@ -105,11 +96,9 @@
       margin-top: 28px;
       width: 50%;
     }
-
     #formButtons a#downloadZip {
       background-color: #005f2a;
     }
-
     #fileInputSection,
     #pathInputSection,
     #downloadZip {
@@ -118,17 +107,14 @@
       margin: 8px auto;
       text-align: right;
     }
-
     #pathInputSection input {
       width: 100%;
     }
-
     #errorMessage {
       color: #c0392b;
       margin-top: 8px;
       font-size: 0.9em;
     }
-
     pre {
       background-color: #f1f1f1;
       padding: 16px;
@@ -140,7 +126,6 @@
       overflow-x: auto;
       white-space: pre-wrap;
     }
-
     a#downloadZip {
       display: block;
       margin-top: 20px;
@@ -153,11 +138,9 @@
       text-align: center;
       transition: background-color 0.3s;
     }
-
     a#downloadZip:hover {
       background-color: #005f2a;
     }
-
     #chooseFileBtn,
     #choosePathBtn {
       background-color: #007c37;
@@ -174,98 +157,117 @@
       max-width: 420px;
       text-align: left;
     }
+    .profile {
+      border: 1px solid #c2c2c2;
+      margin: 10px auto;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 420px;
+      background-color: #fefefe;
+    }
+    #videoContainer {
+      display: none;
+      margin-top: 20px;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #videoPlayer {
+      width: 100%;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #005f2a;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
   </style>
-
-
-
-
 </head>
-
 <body>
   <main>
-  <h2>Video encoding settings (FFmpeg)</h2>
+    <h2>FFmpeg Stream Generator</h2>
+    
+    <div class="button-container">
+      <button id="chooseFileBtn">Upload File</button>
+      <button id="choosePathBtn">Use File Path</button>
+    </div>
 
-  <form id="ffmpegForm">
-    <label >
-      <div style="text-align: center; font-weight: bold; margin-bottom: 0px; font-size: 2vh;">Input video file</div>
-      <button type="button" id="chooseFileBtn"> choose video file </button>
-      <div id="fileInputSection" style="display: block;">
-        <input type="file" id="inputFileVideo" />
+    <div id="errorMessage"></div>
+
+    <form id="ffmpegForm">
+      <div id="fileInputSection" style="display: none;">
+        <label for="inputFileVideo">Upload Video File:</label>
+        <input type="file" id="inputFileVideo" accept="video/*"><br><br>
       </div>
-      <button type="button" id="choosePathBtn"> choose path file </button>
 
       <div id="pathInputSection" style="display: none;">
-        <input type="text" id="inputPathVideo" placeholder="Paste or type the folder path" />
+        <label for="inputPathVideo">Video File Path:</label>
+        <input type="text" id="inputPathVideo" placeholder="Enter full path to video file"><br><br>
       </div>
 
-      <div id="errorMessage" style="color: red; display: none;"></div>
-    </label>
+      <label for="adVolume">Ad Volume:</label>
+      <input type="number" id="adVolume" value="-28"><br><br>
 
-    <label>Volume:
-      <input type="number" id="adVolume" value="-21" step="1" required max="0" />
-    </label>
-    <label>FPS:
-      <select id="fps" required>
-        <option value="25" selected>25</option>
-        <option value="50">50</option>
-      </select>
-    </label>
+      <label for="audioRate">Audio Rate:</label>
+      <input type="number" id="audioRate" value="48000"><br><br>
 
-    <label>Bitrate:
-      <input type="text" id="bitrate" value="2000" required />
-    </label>
+      <label for="audioBitrate">Audio Bitrate (kbps):</label>
+      <input type="number" id="audioBitrate" value="128"><br><br>
 
-    <label>Audio Rate:
-      <input type="text" id="audioRate" value="48000" required />
-    </label>
+      <label for="audioProfile">Audio Profile:</label>
+      <select id="audioProfile">
+        <option value="aac_he">AAC HE</option>
+        <option value="aac_low">AAC Low</option>
+      </select><br><br>
 
-    <label>Audio Bitrate:
-      <input type="text" id="audioBitrate" value="128" required />
-    </label>
+      <label for="audioCodec">Audio Codec:</label>
+      <select id="audioCodec">
+        <option value="aac">AAC</option>
+        <option value="mp3">MP3</option>
+      </select><br><br>
 
-    <label>Preset:
-      <select id="preset">
-        <option value="ultrafast">ultrafast</option>
-        <option value="superfast">superfast</option>
-        <option value="veryfast" selected>veryfast</option>
-        <option value="faster">faster</option>
-        <option value="fast">fast</option>
-        <option value="medium">medium</option>
-        <option value="slow">slow</option>
-        <option value="veryslow">veryslow</option>
-      </select>
-    </label>
+      <label for="channelMode">Channel Mode:</label>
+      <select id="channelMode">
+        <option value="stereo">Stereo</option>
+        <option value="mono">Mono</option>
+      </select><br><br>
 
-    <label>playlist name:
-      <input type="text" id="playlistName" value="my-video" required />
-    </label>
-    
-    <label>segment pattern:
-      <input type="text" id="segmentName" value="segment" required />
-    </label>
+      <label for="preset">Preset:</label>
+      <input type="text" id="preset" value="veryfast"><br><br>
 
-    <label>Duration of each segment (hls_time):
-      <input type="number" id="hlsTime" value="4" required min="1" />
-    </label>
+      <label for="playlistName">Playlist Name:</label>
+      <input type="text" id="playlistName" value="playlist"><br><br>
 
-    <button type="submit">sent parameters</button>
+      <label for="segmentName">Segment Name:</label>
+      <input type="text" id="segmentName" value="segment"><br><br>
 
-  </form>
+      <label for="hlsTime">HLS Time (seconds):</label>
+      <input type="number" id="hlsTime" value="6"><br><br>
 
-  <div id="videoContainer" style="display:none; margin-top: 20px;">
-    <video id="videoPlayer" controls width="50%" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" poster="/images/ffmpegImage.jpg">
-      Your browser does not support the video tag.
-    </video>
-  </div>
+      <div id="profilesContainer"></div>
+      <button type="button" onclick="addProfile()">+ Add Profile</button><br><br>
 
-  <button >
-    <a id="downloadZip" style="display: none;" href="#"  download>⬇️ download ZIP</a>
-  </button>
+      <button type="submit">Generate Stream</button>
 
-  <pre id="outputJson"></pre>
-</main>
+      <button type="button" onclick="buildFfmpegJson()">📄 צור JSON בלבד</button>
+    </form>
+
+    <a id="downloadZip" href="#" download>Download Output Files</a>
+
+    <div id="videoContainer">
+      <h2>Preview</h2>
+      <video id="videoPlayer" controls></video>
+    </div>
+
+    <h2>Output JSON</h2>
+    <pre id="outputJson"></pre>
+  </main>
 
   <script src="script.js"></script>
 </body>
-
 </html>
