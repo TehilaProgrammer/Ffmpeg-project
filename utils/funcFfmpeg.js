@@ -2,112 +2,102 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const archiver = require('archiver');
 const path = require('path');
+
 function generateFfmpegCommand(data) {
   const {
     inputPath,
     output_folder,
     sessionId,
-    adVolume,
-    fps,
+    adVolume, 
+    fps, 
     preset,
-    audio_rate,
-    audio_bitrate,
+    audio_rate, 
+    audio_bitrate, 
     audio_codec,
-    playlist_name,
-    segment_name,
-    hls_time,
+    hls_time, 
     profiles
   } = data;
 
+    
+  if (!profiles || !profiles.length)
+    throw new Error("No video profiles provided.");
+
   const gop = fps * hls_time;
-  // Use session-specific folder for FFmpeg output
-  const sessionOutputPath = path.join(output_folder, sessionId);
+  const base = path.resolve(path.join(output_folder, sessionId));
+  fs.mkdirSync(base, { recursive: true });
 
-  let args = [];
-  console.log("Input path:", inputPath);
-  console.log("Output folder:", output_folder);
-  console.log("Session output path:", sessionOutputPath);
+  profiles.forEach((_, i) => {
+    const variantDir = path.join(base, `stream_${i}`);
+    fs.mkdirSync(variantDir, { recursive: true });
+  });
 
-  args.push("-y");
-  args.push("-v", "warning");
+  const streamDir = path.join(base, 'stream');
+  fs.mkdirSync(streamDir, { recursive: true });
 
-  let processedInputPath = inputPath;
-  if (!/^https?:\/\//i.test(inputPath)) {
-    if (!path.isAbsolute(inputPath)) {
-      processedInputPath = path.join(process.cwd(), inputPath);
-    }
-  }
-  args.push("-i", processedInputPath);
+  const args = [
+     '-y', '-v', 'warning',
+    '-i', inputPath,
+    '-threads', '0', '-max_muxing_queue_size', '256',
+    '-max_alloc', '536870912', '-bufsize', '1M', '-maxrate', '1M',
+    '-af', `loudnorm=I=${adVolume}:LRA=2:TP=-2.5,aresample=async=1`
+  ];
 
-  args.push("-af", `loudnorm=I=${adVolume}:LRA=2:TP=-2.5,aresample=async=1`);
+  let fc = `[0:v]split=${profiles.length}`;
+  profiles.forEach((_, i) => fc += `[v${i}]`);
+  fc += ';';
+  profiles.forEach((p, i) => {
+    const [w, h] = p.resolution.split('x');
+    fc += `[v${i}]scale=${w}:${h}:force_original_aspect_ratio=decrease,` +
+          `fps=${p.fps},pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2[v${i}out];`;
+  });
+  args.push('-filter_complex', fc.slice(0, -1));
 
-  let filterComplex = `[0:v]split=${profiles.length}`;
-  for (let i = 0; i < profiles.length; i++) {
-    filterComplex += `[v${i}]`;
-  }
-  filterComplex += ";";
+  // מיפוי סטרימים
+  profiles.forEach((p, i) => {
+    args.push(
+      '-map', `[v${i}out]`,
+      `-c:v:${i}`, 'libx264',
+      `-pix_fmt:v:${i}`, 'yuv420p',
+      `-profile:v:${i}`, 'baseline',
+      `-b:v:${i}`, p.bitrate,
+      `-maxrate:v:${i}`, p.maxrate,
+      `-bufsize:v:${i}`, p.bufsize,
+      '-preset', preset || 'ultrafast',
+      '-tune', 'zerolatency',
+      '-g', p.gop || gop,
+      '-keyint_min', p.keyint_min || gop,
 
-  for (let i = 0; i < profiles.length; i++) {
-    const { resolution, fps: pfps } = profiles[i];
-    const [width, height] = resolution.split('x');
-    filterComplex += `[v${i}]scale=${width}:${height}:force_original_aspect_ratio=decrease,fps=${pfps},pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2[v${i}out];`;
-  }
+      '-map', '0:a:0',
+      `-c:a:${i}`, audio_codec || 'aac',
+      `-ar:${i}`, audio_rate || '44100',
+      `-b:a:${i}`, audio_bitrate || '96k'
+    );
+  });
 
-  filterComplex = filterComplex.slice(0, -1);
+  args.push(
+    '-f', 'hls',
+    '-hls_time', `${hls_time}`,
+    '-hls_list_size', '0',
+    '-hls_segment_type', 'mpegts',
+    '-hls_flags', 'independent_segments',
+    '-hls_playlist_type', 'vod',
+    '-hls_segment_filename', path.join(base, 'stream_%v_%03d.ts'),
+    '-master_pl_name', 'master.m3u8',
+    '-var_stream_map', profiles.map((_, i) => `v:${i},a:${i}`).join(' '),
+    path.join(base, 'playlist_%v.m3u8')
+  );
+  
 
-  args.push("-filter_complex", filterComplex);
-
-  for (let i = 0; i < profiles.length; i++) {
-    const p = profiles[i];
-    args.push(`-map`, `[v${i}out]`);
-    args.push(`-c:v:${i}`, "h264");
-    args.push(`-pix_fmt:v:${i}`, "yuv420p");
-    args.push(`-profile:v:${i}`, p.profile);
-    args.push(`-b:v:${i}`, p.bitrate);
-    args.push(`-maxrate:v:${i}`, p.maxrate);
-    args.push(`-bufsize:v:${i}`, p.bufsize);
-    args.push(`-fps_mode`, p.fps_mode);
-    args.push(`-g`, p.gop);
-    args.push(`-keyint_min`, p.keyint_min);
-    args.push(`-level:v:${i}`, p.level);
-    args.push(`-preset`, preset);
-  }
-
-  for (let i = 0; i < profiles.length; i++) {
-    args.push(`-map`, "0:a:0?");
-    args.push(`-c:a:${i}`, audio_codec);
-    args.push(`-ar`, audio_rate);
-    args.push(`-b:a:${i}`, audio_bitrate);
-    args.push("-async", "1");
-  }
-
-  args.push("-f", "hls");
-  args.push("-force_key_frames", `expr:gte(t,n_forced*${hls_time})`);
-  args.push("-hls_time", hls_time.toString());
-  args.push("-avoid_negative_ts", "make_zero");
-  args.push("-hls_playlist_type", "vod");
-
-  args.push("-hls_fmp4_init_filename", `%v_${sessionId}-init.mp4`);
-  args.push("-master_pl_name", `${sessionId}-master.m3u8`);
-
-  let streamMap = "";
-  for (let i = 0; i < profiles.length; i++) {
-    streamMap += `v:${i},a:${i} `;
-  }
-  args.push("-var_stream_map", streamMap.trim());
-
-  args.push(path.join(sessionOutputPath, `%v_${sessionId}-playlist.m3u8`));
-
-  console.log("Generated FFmpeg args:", args.join(' '));
-
+  console.log("✅ FFmpeg args:\n", args.join(' '));
   return args;
 }
+
 
 function runFfmpegCommand(args, outputFolder, callback) {
   console.log("runFfmpegCommand");
   console.log("Output folder:", outputFolder);
   
-  const ffmpeg = spawn('ffmpeg', args, { shell: true });
+  const ffmpeg = spawn('ffmpeg', args);
   console.log("FFmpeg process started");
 
   ffmpeg.stdout.on('data', (data) => {
@@ -131,8 +121,10 @@ function runFfmpegCommand(args, outputFolder, callback) {
     // List contents of output folder
     console.log("Contents of output folder:", fs.readdirSync(outputFolder));
 
-    const folderName = path.basename(outputFolder);
-    const zipPath = path.join(outputFolder, `${folderName}.zip`);
+    // Create zip file in the public/output directory
+    const zipFileName = path.basename(outputFolder) + '.zip';
+    //const zipPath = path.join(outputFolder, zipFileName);
+    const zipPath = path.join(outputFolder, zipFileName);
     console.log("Creating zip at:", zipPath);
 
     // Remove existing zip if it exists
@@ -145,40 +137,52 @@ function runFfmpegCommand(args, outputFolder, callback) {
       }
     }
 
-    const output = fs.createWriteStream(zipPath, { mode: 0o666 }); // Set readable permissions
-    const archive = archiver("zip", { 
+    const output = fs.createWriteStream(zipPath);
+    const archive = archiver('zip', { 
       zlib: { level: 9 },
-      store: false // Don't store files, compress them
+      store: false
     });
 
-    output.on("close", () => {
-      console.log(`✅ ZIP created (${archive.pointer()} bytes)`);
-      // Set file permissions after creation
+    output.on('close', () => {
+      console.log(`✅ ZIP created (${archive.pointer()} bytes) at ${zipPath}`);
+      
+      // Verify the zip file exists and has content
       try {
-        fs.chmodSync(zipPath, 0o666); // Make file readable by all
-        console.log("Set zip file permissions to 666");
+        const stats = fs.statSync(zipPath);
+        if (stats.size === 0) {
+          console.error('❌ Created zip file is empty');
+          if (callback) callback(new Error('Created zip file is empty'));
+          return;
+        }
+        console.log(`✅ Zip file size: ${stats.size} bytes`);
+        
+        // Set file permissions
+        fs.chmodSync(zipPath, 0o666);
+        console.log('✅ Set zip file permissions to 666');
+        
+        if (callback) callback(null, zipPath);
       } catch (err) {
-        console.error("Error setting zip permissions:", err);
+        console.error('❌ Error verifying zip file:', err);
+        if (callback) callback(err);
       }
-      if (callback) callback(null, zipPath);
     });
 
-    output.on("error", (err) => {
-      console.error("❌ Error writing zip file:", err);
+    output.on('error', (err) => {
+      console.error('❌ Error writing zip file:', err);
       if (callback) callback(err);
     });
 
-    archive.on("error", (err) => {
-      console.error("❌ Error creating archive:", err);
+    archive.on('error', (err) => {
+      console.error('❌ Error creating archive:', err);
       if (callback) callback(err);
     });
 
-    archive.on("warning", (err) => {
-      console.warn("⚠️ Archive warning:", err);
+    archive.on('warning', (err) => {
+      console.warn('⚠️ Archive warning:', err);
     });
 
-    // Include all subdirectories in the zip
     archive.directory(outputFolder, false);
+    archive.pipe(output);
     archive.finalize();
   });
 }

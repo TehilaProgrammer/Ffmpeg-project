@@ -16,22 +16,88 @@ eventSource.onmessage = function (event) {
     const playlistPath = data.playlistUrl;
     if (data.downloadUrl) {
       const downloadBtn = document.getElementById("downloadZip");
-      // Add download attribute and proper filename
-      downloadBtn.setAttribute('download', path.basename(data.downloadUrl));
-      // Make sure the URL is absolute
-      const downloadUrl = data.downloadUrl.startsWith('/') ? data.downloadUrl : '/' + data.downloadUrl;
-      downloadBtn.href = downloadUrl;
+      const zipFileName = data.downloadUrl.split('/').pop();
+      console.log('Setting up download for:', zipFileName);
+      
+      // Configure download button with proper attributes
+      downloadBtn.href = data.downloadUrl;
+      downloadBtn.setAttribute('download', zipFileName);
+      downloadBtn.setAttribute('type', 'application/zip');
       downloadBtn.style.display = "block";
-      console.log("Set download URL to:", downloadUrl);
+      
+      // Add click handler to ensure proper download
+      downloadBtn.onclick = function(e) {
+        e.preventDefault();
+        console.log('Initiating download of:', data.downloadUrl);
+        
+        // Log the full data object to see what we're working with
+        console.log('Full data object for download:', data);
+        
+        fetch(data.downloadUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/zip'
+          }
+        })
+        .then(async response => {
+          console.log('Download response status:', response.status);
+          console.log('Download response headers:', Object.fromEntries(response.headers.entries()));
+          
+          // Try to get the response text if there's an error
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server response:', errorText);
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
+          }
+          
+          // Check content type
+          const contentType = response.headers.get('content-type');
+          console.log('Content-Type:', contentType);
+          if (!contentType || !contentType.includes('application/zip')) {
+            console.warn('Warning: Unexpected content type:', contentType);
+          }
+          
+          return response.blob();
+        })
+        .then(blob => {
+          console.log('Received blob:', {
+            type: blob.type,
+            size: blob.size,
+            lastModified: blob.lastModified
+          });
+          
+          if (blob.size === 0) {
+            throw new Error('Received empty file');
+          }
+          
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = zipFileName;
+          document.body.appendChild(a);
+          console.log('Triggering download of:', zipFileName);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          a.remove();
+        })
+        .catch(error => {
+          console.error('Download error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+          });
+          alert(`Download failed: ${error.message}\nPlease check the console for more details.`);
+        });
+      };
     }
 //!!add profiles,calculates,update profile
-    if (playlistPath) {
+    if (data.playlistUrl) {
       const videoContainer = document.getElementById("videoContainer");
       const video = document.getElementById("videoPlayer");
 
       if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.loadSource(playlistPath);
+        hls.loadSource(data.playlistUrl);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, function () {
         });
@@ -39,7 +105,7 @@ eventSource.onmessage = function (event) {
           console.error("Video error (HLS supported):", e);
         });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = playlistPath;
+        video.src = data.playlistUrl;
         video.addEventListener("loadedmetadata", function () {
         });
         video.addEventListener("error", function (e) {
@@ -297,7 +363,7 @@ function buildFfmpegJson() {
   console.log("in build JSON");
   console.log(profileCount);
   
-  const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+ // const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
 
   const inputPath = document.getElementById("inputPathVideo").value.trim();
   const outputFolder = `public/output/${new Date().toISOString().replace(/[:.]/g, "_")}`;
