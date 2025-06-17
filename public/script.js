@@ -9,7 +9,6 @@ const eventSource = new EventSource(`/api/status?sessionId=${sessionId}`);
 eventSource.onmessage = function (event) {
   const data = JSON.parse(event.data);
   console.log('Status update:', data);
-  console.log("Full data object:", data);
   document.getElementById("outputJson").textContent = JSON.stringify(data, null, 2);
 
   if (data.status === "done") {
@@ -18,79 +17,79 @@ eventSource.onmessage = function (event) {
       const downloadBtn = document.getElementById("downloadZip");
       const zipFileName = data.downloadUrl.split('/').pop();
       console.log('Setting up download for:', zipFileName);
-      
+
       // Configure download button with proper attributes
       downloadBtn.href = data.downloadUrl;
       downloadBtn.setAttribute('download', zipFileName);
       downloadBtn.setAttribute('type', 'application/zip');
       downloadBtn.style.display = "block";
-      
+
       // Add click handler to ensure proper download
-      downloadBtn.onclick = function(e) {
+      downloadBtn.onclick = function (e) {
         e.preventDefault();
         console.log('Initiating download of:', data.downloadUrl);
-        
+
         // Log the full data object to see what we're working with
         console.log('Full data object for download:', data);
-        
+
         fetch(data.downloadUrl, {
           method: 'GET',
           headers: {
             'Accept': 'application/zip'
           }
         })
-        .then(async response => {
-          console.log('Download response status:', response.status);
-          console.log('Download response headers:', Object.fromEntries(response.headers.entries()));
-          
-          // Try to get the response text if there's an error
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Server response:', errorText);
-            throw new Error(`Server error: ${response.status} - ${errorText}`);
-          }
-          
-          // Check content type
-          const contentType = response.headers.get('content-type');
-          console.log('Content-Type:', contentType);
-          if (!contentType || !contentType.includes('application/zip')) {
-            console.warn('Warning: Unexpected content type:', contentType);
-          }
-          
-          return response.blob();
-        })
-        .then(blob => {
-          console.log('Received blob:', {
-            type: blob.type,
-            size: blob.size,
-            lastModified: blob.lastModified
+          .then(async response => {
+            console.log('Download response status:', response.status);
+            console.log('Download response headers:', Object.fromEntries(response.headers.entries()));
+
+            // Try to get the response text if there's an error
+            if (!response.ok) {
+              const errorText = await response.text();
+              console.error('Server response:', errorText);
+              throw new Error(`Server error: ${response.status} - ${errorText}`);
+            }
+
+            // Check content type
+            const contentType = response.headers.get('content-type');
+            console.log('Content-Type:', contentType);
+            if (!contentType || !contentType.includes('application/zip')) {
+              console.warn('Warning: Unexpected content type:', contentType);
+            }
+
+            return response.blob();
+          })
+          .then(blob => {
+            console.log('Received blob:', {
+              type: blob.type,
+              size: blob.size,
+              lastModified: blob.lastModified
+            });
+
+            if (blob.size === 0) {
+              throw new Error('Received empty file');
+            }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = zipFileName;
+            document.body.appendChild(a);
+            console.log('Triggering download of:', zipFileName);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+          })
+          .catch(error => {
+            console.error('Download error details:', {
+              message: error.message,
+              stack: error.stack,
+              name: error.name
+            });
+            alert(`Download failed: ${error.message}\nPlease check the console for more details.`);
           });
-          
-          if (blob.size === 0) {
-            throw new Error('Received empty file');
-          }
-          
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = zipFileName;
-          document.body.appendChild(a);
-          console.log('Triggering download of:', zipFileName);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          a.remove();
-        })
-        .catch(error => {
-          console.error('Download error details:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-          });
-          alert(`Download failed: ${error.message}\nPlease check the console for more details.`);
-        });
       };
     }
-//!!add profiles,calculates,update profile
+    //!!add profiles,calculates,update profile
     if (data.playlistUrl) {
       const videoContainer = document.getElementById("videoContainer");
       const video = document.getElementById("videoPlayer");
@@ -146,8 +145,7 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
   e.preventDefault();
 
   const formData = new FormData(this);
-  
- 
+
   const inputVideo = document.getElementById("inputFileVideo")?.files[0];
   const inputPath = document.getElementById("inputPathVideo")?.value?.trim();
   const showFileInput = document.getElementById("fileInputSection").style.display !== "none";
@@ -158,7 +156,7 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
     return;
   }
 
- 
+
   let uploadedInputPath = inputPath;
   if (showFileInput) {
     const uploadFormData = new FormData();
@@ -176,7 +174,7 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
       return;
     }
     uploadedInputPath = uploadResult.inputPath;
-}
+  }
   const outputFolder = `public/output/${new Date().toISOString().replace(/[:.]/g, "_")}`;
   const profiles = [];
   for (let i = 0; i < profileCount; i++) {
@@ -222,7 +220,8 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     const result = await response.json();
-    if (result.success) {
+    
+    if (result.status == "done") {
       document.getElementById("outputJson").textContent = JSON.stringify(result, null, 2);
     } else {
       alert("Error: " + (result.error || "Unknown error occurred"));
@@ -233,7 +232,7 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
   }
 });
 function addProfile() {
-  
+
   const container = document.getElementById("profilesContainer");
   const html = `
     <fieldset style="margin-top:20px; border:1px solid #ccc; padding:10px; border-radius:8px;">
@@ -290,7 +289,7 @@ function updateProfileSettings(selectElement, profileIndex) {
   const bufsizeInput = document.querySelector(`[name="bufsize_${profileIndex}"]`);
   const gopInput = document.querySelector(`[name="gop_${profileIndex}"]`);
   const keyintMinInput = document.querySelector(`[name="keyint_min_${profileIndex}"]`);
-  
+
   // Set resolution and fps
   document.querySelector(`[name="resolution_${profileIndex}"]`).value = resolution;
   document.querySelector(`[name="fps_${profileIndex}"]`).value = fps;
@@ -337,7 +336,7 @@ function updateProfileSettings(selectElement, profileIndex) {
 
   if (selectElement.value) {
     const selectedSettings = settings[selectElement.value];
-    
+
     // Update form fields
     profileSelect.value = selectedSettings.profile;
     levelSelect.value = selectedSettings.level;
@@ -356,14 +355,14 @@ function updateProfileSettings(selectElement, profileIndex) {
     gopInput.value = '';
     keyintMinInput.value = '';
   }
-} 
+}
 //!!JSON building
 function buildFfmpegJson() {
-        
+
   console.log("in build JSON");
   console.log(profileCount);
-  
- // const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+
+  // const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
 
   const inputPath = document.getElementById("inputPathVideo").value.trim();
   const outputFolder = `public/output/${new Date().toISOString().replace(/[:.]/g, "_")}`;

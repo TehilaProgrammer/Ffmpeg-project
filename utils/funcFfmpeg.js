@@ -4,21 +4,44 @@ const archiver = require('archiver');
 const path = require('path');
 
 function generateFfmpegCommand(data) {
+
+  const filePath = path.join(__dirname, 'last_used_data.json');
+  let existingData = [];
+
+  if (fs.existsSync(filePath)) {
+    try {
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      existingData = JSON.parse(fileContent);
+      if (!Array.isArray(existingData)) {
+        existingData = [];
+      }
+    } catch (err) {
+      console.error("error json:", err);
+      existingData = [];
+    }
+  }
+
+  existingData.push(data);
+
+  fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf8');
+
+  console.log("Got data in generateFfmpegCommand:", data);
+
   const {
     inputPath,
     output_folder,
     sessionId,
-    adVolume, 
-    fps, 
+    adVolume,
+    fps,
     preset,
-    audio_rate, 
-    audio_bitrate, 
+    audio_rate,
+    audio_bitrate,
     audio_codec,
-    hls_time, 
+    hls_time,
     profiles
   } = data;
 
-    
+
   if (!profiles || !profiles.length)
     throw new Error("No video profiles provided.");
 
@@ -35,7 +58,7 @@ function generateFfmpegCommand(data) {
   fs.mkdirSync(streamDir, { recursive: true });
 
   const args = [
-     '-y', '-v', 'warning',
+    '-y', '-v', 'warning',
     '-i', inputPath,
     '-threads', '0', '-max_muxing_queue_size', '256',
     '-max_alloc', '536870912', '-bufsize', '1M', '-maxrate', '1M',
@@ -48,7 +71,7 @@ function generateFfmpegCommand(data) {
   profiles.forEach((p, i) => {
     const [w, h] = p.resolution.split('x');
     fc += `[v${i}]scale=${w}:${h}:force_original_aspect_ratio=decrease,` +
-          `fps=${p.fps},pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2[v${i}out];`;
+      `fps=${p.fps},pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2[v${i}out];`;
   });
   args.push('-filter_complex', fc.slice(0, -1));
 
@@ -86,7 +109,7 @@ function generateFfmpegCommand(data) {
     '-var_stream_map', profiles.map((_, i) => `v:${i},a:${i}`).join(' '),
     path.join(base, 'playlist_%v.m3u8')
   );
-  
+
 
   console.log("✅ FFmpeg args:\n", args.join(' '));
   return args;
@@ -96,7 +119,7 @@ function generateFfmpegCommand(data) {
 function runFfmpegCommand(args, outputFolder, callback) {
   console.log("runFfmpegCommand");
   console.log("Output folder:", outputFolder);
-  
+
   const ffmpeg = spawn('ffmpeg', args);
   console.log("FFmpeg process started");
 
@@ -110,7 +133,7 @@ function runFfmpegCommand(args, outputFolder, callback) {
 
   ffmpeg.on('close', (code) => {
     console.log(`✅ FFmpeg process exited with code ${code}`);
-    
+
     // Check if output folder exists
     if (!fs.existsSync(outputFolder)) {
       console.error(`❌ Output folder does not exist: ${outputFolder}`);
@@ -121,10 +144,9 @@ function runFfmpegCommand(args, outputFolder, callback) {
     // List contents of output folder
     console.log("Contents of output folder:", fs.readdirSync(outputFolder));
 
-    // Create zip file in the public/output directory
+    // Create zip file in the parent directory (next to the output folder)
     const zipFileName = path.basename(outputFolder) + '.zip';
-    //const zipPath = path.join(outputFolder, zipFileName);
-    const zipPath = path.join(outputFolder, zipFileName);
+    const zipPath = path.join(path.dirname(outputFolder), zipFileName);
     console.log("Creating zip at:", zipPath);
 
     // Remove existing zip if it exists
@@ -138,14 +160,14 @@ function runFfmpegCommand(args, outputFolder, callback) {
     }
 
     const output = fs.createWriteStream(zipPath);
-    const archive = archiver('zip', { 
+    const archive = archiver('zip', {
       zlib: { level: 9 },
       store: false
     });
 
     output.on('close', () => {
       console.log(`✅ ZIP created (${archive.pointer()} bytes) at ${zipPath}`);
-      
+
       // Verify the zip file exists and has content
       try {
         const stats = fs.statSync(zipPath);
@@ -155,11 +177,11 @@ function runFfmpegCommand(args, outputFolder, callback) {
           return;
         }
         console.log(`✅ Zip file size: ${stats.size} bytes`);
-        
+
         // Set file permissions
         fs.chmodSync(zipPath, 0o666);
         console.log('✅ Set zip file permissions to 666');
-        
+
         if (callback) callback(null, zipPath);
       } catch (err) {
         console.error('❌ Error verifying zip file:', err);
@@ -181,7 +203,7 @@ function runFfmpegCommand(args, outputFolder, callback) {
       console.warn('⚠️ Archive warning:', err);
     });
 
-    archive.directory(outputFolder, false);
+    archive.directory(outputFolder, path.basename(outputFolder));
     archive.pipe(output);
     archive.finalize();
   });
@@ -198,4 +220,3 @@ function ensureVariantFolders(outputFolder, sessionId, profiles) {
 }
 
 module.exports = { generateFfmpegCommand, runFfmpegCommand, ensureVariantFolders };
- 
