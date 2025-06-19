@@ -4,116 +4,54 @@ let showPathInput = false;
 let profileCount = 0;
 
 const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-const eventSource = new EventSource(`/api/status?sessionId=${sessionId}`);
+const eventSource = new EventSource(`/api/status/${sessionId}`);
+
 
 eventSource.onmessage = function (event) {
   const data = JSON.parse(event.data);
   console.log('Status update:', data);
   document.getElementById("outputJson").textContent = JSON.stringify(data, null, 2);
 
-  if (data.status === "done") {
+  if (typeof data.status === "object" && data.status.status === "done") {
+
     const playlistPath = data.playlistUrl;
-    if (data.downloadUrl) {
+    if (data.status.downloadUrl) {
+
       const downloadBtn = document.getElementById("downloadZip");
-      const zipFileName = data.downloadUrl.split('/').pop();
+      const zipFileName = data.status.downloadUrl.split('/').pop();
       console.log('Setting up download for:', zipFileName);
 
       // Configure download button with proper attributes
-      downloadBtn.href = data.downloadUrl;
+      downloadBtn.href = data.status.downloadUrl;
       downloadBtn.setAttribute('download', zipFileName);
       downloadBtn.setAttribute('type', 'application/zip');
       downloadBtn.style.display = "block";
-
-      // Add click handler to ensure proper download
-      downloadBtn.onclick = function (e) {
-        e.preventDefault();
-        console.log('Initiating download of:', data.downloadUrl);
-
-        // Log the full data object to see what we're working with
-        console.log('Full data object for download:', data);
-
-        fetch(data.downloadUrl, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/zip'
-          }
-        })
-          .then(async response => {
-            console.log('Download response status:', response.status);
-            console.log('Download response headers:', Object.fromEntries(response.headers.entries()));
-
-            // Try to get the response text if there's an error
-            if (!response.ok) {
-              const errorText = await response.text();
-              console.error('Server response:', errorText);
-              throw new Error(`Server error: ${response.status} - ${errorText}`);
-            }
-
-            // Check content type
-            const contentType = response.headers.get('content-type');
-            console.log('Content-Type:', contentType);
-            if (!contentType || !contentType.includes('application/zip')) {
-              console.warn('Warning: Unexpected content type:', contentType);
-            }
-
-            return response.blob();
-          })
-          .then(blob => {
-            console.log('Received blob:', {
-              type: blob.type,
-              size: blob.size,
-              lastModified: blob.lastModified
-            });
-
-            if (blob.size === 0) {
-              throw new Error('Received empty file');
-            }
-
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = zipFileName;
-            document.body.appendChild(a);
-            console.log('Triggering download of:', zipFileName);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
-          })
-          .catch(error => {
-            console.error('Download error details:', {
-              message: error.message,
-              stack: error.stack,
-              name: error.name
-            });
-            alert(`Download failed: ${error.message}\nPlease check the console for more details.`);
-          });
-      };
-    }
+     }
     //!!add profiles,calculates,update profile
-    if (data.playlistUrl) {
-      const videoContainer = document.getElementById("videoContainer");
-      const video = document.getElementById("videoPlayer");
+    // if (data.playlistUrl) {
+    //   const videoContainer = document.getElementById("videoContainer");
+    //   const video = document.getElementById("videoPlayer");
 
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(data.playlistUrl);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        });
-        video.addEventListener("error", function (e) {
-          console.error("Video error (HLS supported):", e);
-        });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = data.playlistUrl;
-        video.addEventListener("loadedmetadata", function () {
-        });
-        video.addEventListener("error", function (e) {
-          console.error("Video error (native HLS):", e);
-        });
-      }
+    //   if (Hls.isSupported()) {
+    //     const hls = new Hls();
+    //     hls.loadSource(data.playlistUrl);
+    //     hls.attachMedia(video);
+    //     hls.on(Hls.Events.MANIFEST_PARSED, function () {
+    //     });
+    //     video.addEventListener("error", function (e) {
+    //       console.error("Video error (HLS supported):", e);
+    //     });
+    //   } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    //     video.src = data.playlistUrl;
+    //     video.addEventListener("loadedmetadata", function () {
+    //     });
+    //     video.addEventListener("error", function (e) {
+    //       console.error("Video error (native HLS):", e);
+    //     });
+    //   }
 
-      videoContainer.style.display = "block";
-    }
+    //   videoContainer.style.display = "block";
+    // }
   }
 };
 
@@ -220,7 +158,7 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     const result = await response.json();
-    
+
     if (result.status == "done") {
       document.getElementById("outputJson").textContent = JSON.stringify(result, null, 2);
     } else {
@@ -231,6 +169,8 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
     alert("Error generating FFmpeg command: " + error.message);
   }
 });
+
+
 function addProfile() {
 
   const container = document.getElementById("profilesContainer");
@@ -365,7 +305,9 @@ function buildFfmpegJson() {
   // const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
 
   const inputPath = document.getElementById("inputPathVideo").value.trim();
-  const outputFolder = `public/output/${new Date().toISOString().replace(/[:.]/g, "_")}`;
+  const now = new Date();
+  const outputFolder = `public/output/${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}T${now.getHours().toString().padStart(2, '0')}_${now.getMinutes().toString().padStart(2, '0')}_${now.getSeconds().toString().padStart(2, '0')}_${now.getMilliseconds()}`;
+  
   const profiles = [];
 
   for (let i = 0; i < profileCount; i++) {

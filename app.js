@@ -10,15 +10,15 @@ const PORT=process.env.PORT||"3000";
 app.use(express.json());
 
 // Handle zip file downloads
-app.get('/output/:timestamp/:sessionId/:filename', (req, res) => {
-  const { timestamp, sessionId, filename } = req.params;
-  console.log('Download request params:', { timestamp, sessionId, filename });
+app.get('/output/:timestamp/:filename', (req, res) => {
+  const { timestamp,  filename } = req.params;
+  console.log('Download request params:', { timestamp, filename });
   
-  const zipPath = path.join(__dirname, 'public', 'output', timestamp, sessionId, filename);
+  const zipPath = path.join(__dirname, 'public', 'output', timestamp, filename);
   console.log('Attempting to serve zip file:', zipPath);
   
   // Validate the request
-  if (!timestamp || !sessionId || !filename) {
+  if (!timestamp  || !filename) {
     console.error('Invalid request parameters:', req.params);
     return res.status(400).json({ error: 'Invalid request parameters' });
   }

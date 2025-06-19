@@ -209,14 +209,5 @@ function runFfmpegCommand(args, outputFolder, callback) {
   });
 }
 
-function ensureVariantFolders(outputFolder, sessionId, profiles) {
-  const basePath = path.join(outputFolder, sessionId);
-  for (let i = 0; i < profiles.length; i++) {
-    const variantFolder = path.join(basePath);
-    if (!fs.existsSync(variantFolder)) {
-      fs.mkdirSync(variantFolder, { recursive: true });
-    }
-  }
-}
 
-module.exports = { generateFfmpegCommand, runFfmpegCommand, ensureVariantFolders };
+module.exports = { generateFfmpegCommand, runFfmpegCommand };
