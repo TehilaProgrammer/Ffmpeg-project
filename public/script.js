@@ -1,4 +1,3 @@
-//!!definition variables,SSE,and conect to html elements
 let showFileInput = true;
 let showPathInput = false;
 let profileCount = 0;
@@ -11,48 +10,6 @@ eventSource.onmessage = function (event) {
   const data = JSON.parse(event.data);
   console.log('Status update:', data);
   document.getElementById("outputJson").textContent = JSON.stringify(data, null, 2);
-
-  if (typeof data.status === "object" && data.status.status === "done") {
-
-    const playlistPath = data.playlistUrl;
-    if (data.status.downloadUrl) {
-
-      const downloadBtn = document.getElementById("downloadZip");
-      const zipFileName = data.status.downloadUrl.split('/').pop();
-      console.log('Setting up download for:', zipFileName);
-
-      // Configure download button with proper attributes
-      downloadBtn.href = data.status.downloadUrl;
-      downloadBtn.setAttribute('download', zipFileName);
-      downloadBtn.setAttribute('type', 'application/zip');
-      downloadBtn.style.display = "block";
-     }
-    //!!add profiles,calculates,update profile
-    // if (data.playlistUrl) {
-    //   const videoContainer = document.getElementById("videoContainer");
-    //   const video = document.getElementById("videoPlayer");
-
-    //   if (Hls.isSupported()) {
-    //     const hls = new Hls();
-    //     hls.loadSource(data.playlistUrl);
-    //     hls.attachMedia(video);
-    //     hls.on(Hls.Events.MANIFEST_PARSED, function () {
-    //     });
-    //     video.addEventListener("error", function (e) {
-    //       console.error("Video error (HLS supported):", e);
-    //     });
-    //   } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    //     video.src = data.playlistUrl;
-    //     video.addEventListener("loadedmetadata", function () {
-    //     });
-    //     video.addEventListener("error", function (e) {
-    //       console.error("Video error (native HLS):", e);
-    //     });
-    //   }
-
-    //   videoContainer.style.display = "block";
-    // }
-  }
 };
 
 eventSource.onerror = function (error) {
@@ -78,7 +35,6 @@ document.getElementById("choosePathBtn").addEventListener("click", function () {
   document.getElementById("errorMessage").style.display = "none";
 });
 
-//!!update the rest parameters automucally,based on the profile,bitrate as gop,butrate and so on...
 document.getElementById("ffmpegForm").addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -93,7 +49,6 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
     alert("Please provide either a video file or input path according to your selection");
     return;
   }
-
 
   let uploadedInputPath = inputPath;
   if (showFileInput) {
@@ -113,6 +68,7 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
     }
     uploadedInputPath = uploadResult.inputPath;
   }
+
   const outputFolder = `public/output/${new Date().toISOString().replace(/[:.]/g, "_")}`;
   const profiles = [];
   for (let i = 0; i < profileCount; i++) {
@@ -148,6 +104,7 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
     sessionId,
     profiles,
   };
+
   try {
     const response = await fetch("/api/convert", {
       method: "POST",
@@ -161,6 +118,8 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
 
     if (result.status == "done") {
       document.getElementById("outputJson").textContent = JSON.stringify(result, null, 2);
+      downloadZip(result.downloadUrl)
+      videoPlayer(result.playlistUrl)
     } else {
       alert("Error: " + (result.error || "Unknown error occurred"));
     }
@@ -170,6 +129,39 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
   }
 });
 
+function downloadZip(downloadUrl) {
+  const downloadBtn = document.getElementById("downloadZip");
+  const zipFileName = downloadUrl.split('/').pop();
+
+  // Configure download button with proper attributes
+  downloadBtn.href = downloadUrl;
+  downloadBtn.setAttribute('download', zipFileName);
+  downloadBtn.setAttribute('type', 'application/zip');
+  downloadBtn.style.display = "block";
+}
+
+function videoPlayer(playlistUrl){
+  const videoContainer = document.getElementById("videoContainer");
+  const video = document.getElementById("videoPlayer");
+
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(playlistUrl);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {});
+    video.addEventListener("error", function (e) {
+      console.error("Video error (HLS supported):", e);
+    });
+  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    video.src = playlistUrl;
+    video.addEventListener("loadedmetadata", function () {});
+    video.addEventListener("error", function (e) {
+      console.error("Video error (native HLS):", e);
+    });
+  }
+
+  videoContainer.style.display = "block";
+}
 
 function addProfile() {
 
@@ -219,7 +211,6 @@ function addProfile() {
   profileCount++;
 }
 
-//!! Function to update profile settings based on resolution and FPS selection
 function updateProfileSettings(selectElement, profileIndex) {
   const [resolution, fps] = selectElement.value.split('_');
   const profileSelect = document.querySelector(`[name="profile_${profileIndex}"]`);
@@ -296,7 +287,6 @@ function updateProfileSettings(selectElement, profileIndex) {
     keyintMinInput.value = '';
   }
 }
-//!!JSON building
 function buildFfmpegJson() {
 
   console.log("in build JSON");
@@ -306,8 +296,8 @@ function buildFfmpegJson() {
 
   const inputPath = document.getElementById("inputPathVideo").value.trim();
   const now = new Date();
-  const outputFolder = `public/output/${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}T${now.getHours().toString().padStart(2, '0')}_${now.getMinutes().toString().padStart(2, '0')}_${now.getSeconds().toString().padStart(2, '0')}_${now.getMilliseconds()}`;
-  
+  const outputFolder = `public/output/${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}T${now.getHours().toString().padStart(2, '0')}_${now.getMinutes().toString().padStart(2, '0')}_${now.getSeconds().toString().padStart(2, '0')}_${now.getMilliseconds()}`;
+
   const profiles = [];
 
   for (let i = 0; i < profileCount; i++) {

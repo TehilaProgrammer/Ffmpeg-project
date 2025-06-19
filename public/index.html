@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="./images/icon2.png">
-   <title>FFmpeg Stream Generator</title>
+  <title>FFmpeg Stream Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     * {
       box-sizing: border-box;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       direction: ltr;
     }
+
     body {
       background-color: #f2f4f3;
       color: #1e1e1e;
       margin: 0;
       padding: 0;
     }
+
     main {
       max-width: 700px;
       margin: 50px auto;
@@ -39,6 +43,7 @@
       flex-direction: column;
       align-items: center;
     }
+
     label {
       width: 100%;
       max-width: 420px;
@@ -48,6 +53,7 @@
       font-weight: 500;
       color: #2e2e2e;
     }
+
     input,
     select {
       width: 100%;
@@ -66,6 +72,7 @@
       box-shadow: 0 0 4px rgba(0, 124, 55, 0.3);
       outline: none;
     }
+
     #formButtons button,
     #formButtons,
     button {
@@ -83,6 +90,7 @@
       margin-left: 1vh;
       margin-right: 1vh;
     }
+
     #downloadZip {
       background-color: #007c37;
       color: white;
@@ -96,9 +104,11 @@
       margin-top: 28px;
       width: 50%;
     }
+
     #formButtons a#downloadZip {
       background-color: #005f2a;
     }
+
     #fileInputSection,
     #pathInputSection,
     #downloadZip {
@@ -107,14 +117,17 @@
       margin: 8px auto;
       text-align: right;
     }
+
     #pathInputSection input {
       width: 100%;
     }
+
     #errorMessage {
       color: #c0392b;
       margin-top: 8px;
       font-size: 0.9em;
     }
+
     pre {
       background-color: #f1f1f1;
       padding: 16px;
@@ -126,6 +139,7 @@
       overflow-x: auto;
       white-space: pre-wrap;
     }
+
     a#downloadZip {
       display: block;
       margin-top: 20px;
@@ -138,9 +152,11 @@
       text-align: center;
       transition: background-color 0.3s;
     }
+
     a#downloadZip:hover {
       background-color: #005f2a;
     }
+
     #chooseFileBtn,
     #choosePathBtn {
       background-color: #007c37;
@@ -157,6 +173,7 @@
       max-width: 420px;
       text-align: left;
     }
+
     .profile {
       border: 1px solid #c2c2c2;
       margin: 10px auto;
@@ -165,6 +182,7 @@
       max-width: 420px;
       background-color: #fefefe;
     }
+
     #videoContainer {
       display: none;
       margin-top: 20px;
@@ -172,14 +190,17 @@
       margin-left: auto;
       margin-right: auto;
     }
+
     #videoPlayer {
       width: 100%;
       border-radius: 8px;
       margin-top: 10px;
     }
+
     button:hover {
       background-color: #005f2a;
     }
+
     .button-container {
       display: flex;
       justify-content: center;
@@ -188,10 +209,11 @@
     }
   </style>
 </head>
+
 <body>
   <main>
     <h2>FFmpeg Stream Generator</h2>
-    
+
     <div class="button-container">
       <button id="chooseFileBtn">Upload File</button>
       <button id="choosePathBtn">Use File Path</button>
@@ -257,12 +279,14 @@
       <button type="button" onclick="buildFfmpegJson()">create JSON</button>
     </form>
 
-    <a id="downloadZip" href="#" download >Download Output Files</a>
-
-    <div id="videoContainer">
-      <h2>Preview</h2>
-      <video id="videoPlayer" controls></video>
+    <div id="videoContainer" style="display:none; margin-top: 20px;">
+      <video id="videoPlayer" controls width="50%" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+        poster="/images/ffmpegImage.jpg">
+        Your browser does not support the video tag.
+      </video>
     </div>
+
+    <a id="downloadZip" href="#" download style="display: none;">Download Output Files</a>
 
     <h2>Output JSON</h2>
     <pre id="outputJson"></pre>
@@ -270,4 +294,5 @@
 
   <script src="script.js"></script>
 </body>
+
 </html>
