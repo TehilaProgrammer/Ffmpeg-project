@@ -1382,5 +1382,230 @@
         "fps_mode": "cfr"
       }
     ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-22T06_35_08_378Z",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750573997587wfj6h8e1r",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "25",
+        "bitrate": "800k",
+        "maxrate": "k",
+        "bufsize": "k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "",
+        "keyint_min": "",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      },
+      {
+        "resolution": "640x360",
+        "fps": "25",
+        "bitrate": "750k",
+        "maxrate": "k",
+        "bufsize": "k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "",
+        "keyint_min": "",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      },
+      {
+        "resolution": "1280x720",
+        "fps": "50",
+        "bitrate": "780k",
+        "maxrate": "k",
+        "bufsize": "k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "",
+        "keyint_min": "",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-22T06_38_14_750Z",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750574262071jeb16r0xp",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "25",
+        "bitrate": "748k",
+        "maxrate": "748k",
+        "bufsize": "748k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      },
+      {
+        "resolution": "640x360",
+        "fps": "25",
+        "bitrate": "643k",
+        "maxrate": "643k",
+        "bufsize": "643k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-22T06_43_17_365Z",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750574550223tgbnjj0gf",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "4681k",
+        "maxrate": "4681k",
+        "bufsize": "4681k",
+        "profile": "High",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-22T06_45_28_328Z",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750574670394kp5g9sjm6",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "4681k",
+        "maxrate": "4681k",
+        "bufsize": "4681k",
+        "profile": "High",
+        "level": "4.2",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      },
+      {
+        "resolution": "640x360",
+        "fps": "25",
+        "bitrate": "734k",
+        "maxrate": "734k",
+        "bufsize": "734k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-22T06_49_14_450Z",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "17505748939619ge7rgl5m",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "4681k",
+        "maxrate": "4681k",
+        "bufsize": "4681k",
+        "profile": "High",
+        "level": "4.2",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      },
+      {
+        "resolution": "360x120",
+        "fps": "25",
+        "bitrate": "734k",
+        "maxrate": "734k",
+        "bufsize": "734k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
   }
 ]

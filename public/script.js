@@ -71,17 +71,30 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
 
   const outputFolder = `public/output/${new Date().toISOString().replace(/[:.]/g, "_")}`;
   const profiles = [];
+  
   for (let i = 0; i < profileCount; i++) {
+    // Get individual resolution width and height for each profile
+    const width = document.querySelector(`[name="resolution_width_${i}"]`).value;
+    const height = document.querySelector(`[name="resolution_height_${i}"]`).value;
+    const resolution = `${width}x${height}`;
+    
+    // Get bitrate and set defaults for other values
+    const bitrate = document.querySelector(`[name="bitrate_${i}"]`).value;
+    const maxrate = document.querySelector(`[name="maxrate_${i}"]`).value || bitrate;
+    const bufsize = document.querySelector(`[name="bufsize_${i}"]`).value || bitrate;
+    const gop = document.querySelector(`[name="gop_${i}"]`).value || "100";
+    const keyintMin = document.querySelector(`[name="keyint_min_${i}"]`).value || "100";
+    
     profiles.push({
-      resolution: document.querySelector(`[name="resolution_${i}"]`).value,
+      resolution: resolution,
       fps: document.querySelector(`[name="fps_${i}"]`).value,
-      bitrate: document.querySelector(`[name="bitrate_${i}"]`).value + "k",
-      maxrate: document.querySelector(`[name="maxrate_${i}"]`).value + "k",
-      bufsize: document.querySelector(`[name="bufsize_${i}"]`).value + "k",
+      bitrate: bitrate + "k",
+      maxrate: maxrate + "k",
+      bufsize: bufsize + "k",
       profile: document.querySelector(`[name="profile_${i}"]`).value,
       level: document.querySelector(`[name="level_${i}"]`).value,
-      gop: document.querySelector(`[name="gop_${i}"]`).value,
-      keyint_min: document.querySelector(`[name="keyint_min_${i}"]`).value,
+      gop: gop,
+      keyint_min: keyintMin,
       codec: "h264",
       pix_fmt: "yuv420p",
       fps_mode: "cfr"
@@ -164,24 +177,24 @@ function videoPlayer(playlistUrl){
 }
 
 function addProfile() {
-
   const container = document.getElementById("profilesContainer");
   const html = `
     <fieldset style="margin-top:20px; border:1px solid #ccc; padding:10px; border-radius:8px;">
       <legend>Profile #${profileCount + 1}</legend>
-      <label>Resolution & FPS:
-        <select name="resolution_fps_${profileCount}" required onchange="updateProfileSettings(this, ${profileCount})">
-          <option value="">Select resolution and FPS</option>
-          <option value="640x360_25">640x360 (SD) - 25fps</option>
-          <option value="768x432_25">768x432 (SD) - 25fps</option>
-          <option value="1024x576_25">1024x576 (SD) - 25fps</option>
-          <option value="1280x720_25">1280x720 (HD) - 25fps</option>
-          <option value="1280x720_50">1280x720 (HD) - 50fps</option>
-          <option value="1920x1080_50">1920x1080 (Full HD) - 50fps</option>
-        </select>
+      
+      <label>Resolution Width:
+        <input type="number" name="resolution_width_${profileCount}" required min="1" max="7680" placeholder="e.g., 1920">
       </label>
+      
+      <label>Resolution Height:
+        <input type="number" name="resolution_height_${profileCount}" required min="1" max="4320" placeholder="e.g., 1080">
+      </label>
+      
+      <label>FPS:
+        <input type="number" name="fps_${profileCount}" required min="1" max="120" step="0.1" placeholder="e.g., 25">
+      </label>
+      
       <input type="hidden" name="resolution_${profileCount}" value="">
-      <input type="hidden" name="fps_${profileCount}" value="">
       
       <label>Profile:
         <select name="profile_${profileCount}" required>
@@ -204,89 +217,14 @@ function addProfile() {
 
       <input type="hidden" name="maxrate_${profileCount}" value="">
       <input type="hidden" name="bufsize_${profileCount}" value="">
-      <input type="hidden" name="gop_${profileCount}" value="">
-      <input type="hidden" name="keyint_min_${profileCount}" value="">
+      <input type="hidden" name="gop_${profileCount}" value="100">
+      <input type="hidden" name="keyint_min_${profileCount}" value="100">
     </fieldset>`;
   container.insertAdjacentHTML("beforeend", html);
   profileCount++;
 }
 
-function updateProfileSettings(selectElement, profileIndex) {
-  const [resolution, fps] = selectElement.value.split('_');
-  const profileSelect = document.querySelector(`[name="profile_${profileIndex}"]`);
-  const levelSelect = document.querySelector(`[name="level_${profileIndex}"]`);
-  const bitrateInput = document.querySelector(`[name="bitrate_${profileIndex}"]`);
-  const maxrateInput = document.querySelector(`[name="maxrate_${profileIndex}"]`);
-  const bufsizeInput = document.querySelector(`[name="bufsize_${profileIndex}"]`);
-  const gopInput = document.querySelector(`[name="gop_${profileIndex}"]`);
-  const keyintMinInput = document.querySelector(`[name="keyint_min_${profileIndex}"]`);
-
-  // Set resolution and fps
-  document.querySelector(`[name="resolution_${profileIndex}"]`).value = resolution;
-  document.querySelector(`[name="fps_${profileIndex}"]`).value = fps;
-
-  // Define settings based on resolution and fps
-  const settings = {
-    '640x360_25': {
-      profile: 'Main',
-      level: '3.1',
-      bitrate: 734,
-      gop: 100
-    },
-    '768x432_25': {
-      profile: 'Main',
-      level: '4.0',
-      bitrate: 1078,
-      gop: 100
-    },
-    '1024x576_25': {
-      profile: 'Main',
-      level: '4.0',
-      bitrate: 1707,
-      gop: 100
-    },
-    '1280x720_25': {
-      profile: 'Main',
-      level: '4.0',
-      bitrate: 2622,
-      gop: 100
-    },
-    '1280x720_50': {
-      profile: 'High',
-      level: '4.2',
-      bitrate: 3995,
-      gop: 200
-    },
-    '1920x1080_50': {
-      profile: 'High',
-      level: '4.2',
-      bitrate: 4681,
-      gop: 200
-    }
-  };
-
-  if (selectElement.value) {
-    const selectedSettings = settings[selectElement.value];
-
-    // Update form fields
-    profileSelect.value = selectedSettings.profile;
-    levelSelect.value = selectedSettings.level;
-    bitrateInput.value = selectedSettings.bitrate;
-    maxrateInput.value = selectedSettings.bitrate;
-    bufsizeInput.value = selectedSettings.bitrate;
-    gopInput.value = selectedSettings.gop;
-    keyintMinInput.value = selectedSettings.gop;
-  } else {
-    // Clear values if no resolution is selected
-    profileSelect.value = 'Main';
-    levelSelect.value = '3.1';
-    bitrateInput.value = '';
-    maxrateInput.value = '';
-    bufsizeInput.value = '';
-    gopInput.value = '';
-    keyintMinInput.value = '';
-  }
-}
+//!!JSON building
 function buildFfmpegJson() {
 
   console.log("in build JSON");
@@ -296,21 +234,33 @@ function buildFfmpegJson() {
 
   const inputPath = document.getElementById("inputPathVideo").value.trim();
   const now = new Date();
-  const outputFolder = `public/output/${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}T${now.getHours().toString().padStart(2, '0')}_${now.getMinutes().toString().padStart(2, '0')}_${now.getSeconds().toString().padStart(2, '0')}_${now.getMilliseconds()}`;
-
+  const outputFolder = `public/output/${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}T${now.getHours().toString().padStart(2, '0')}_${now.getMinutes().toString().padStart(2, '0')}_${now.getSeconds().toString().padStart(2, '0')}_${now.getMilliseconds()}`;
+  
   const profiles = [];
 
   for (let i = 0; i < profileCount; i++) {
+    // Get individual resolution width and height for each profile
+    const width = document.querySelector(`[name="resolution_width_${i}"]`).value;
+    const height = document.querySelector(`[name="resolution_height_${i}"]`).value;
+    const resolution = `${width}x${height}`;
+    
+    // Get bitrate and set defaults for other values
+    const bitrate = document.querySelector(`[name="bitrate_${i}"]`).value;
+    const maxrate = document.querySelector(`[name="maxrate_${i}"]`).value || bitrate;
+    const bufsize = document.querySelector(`[name="bufsize_${i}"]`).value || bitrate;
+    const gop = document.querySelector(`[name="gop_${i}"]`).value || "100";
+    const keyintMin = document.querySelector(`[name="keyint_min_${i}"]`).value || "100";
+    
     profiles.push({
-      resolution: document.querySelector(`[name="resolution_${i}"]`).value,
+      resolution: resolution,
       fps: document.querySelector(`[name="fps_${i}"]`).value,
-      bitrate: document.querySelector(`[name="bitrate_${i}"]`).value + "k",
-      maxrate: document.querySelector(`[name="maxrate_${i}"]`).value + "k",
-      bufsize: document.querySelector(`[name="bufsize_${i}"]`).value + "k",
+      bitrate: bitrate + "k",
+      maxrate: maxrate + "k",
+      bufsize: bufsize + "k",
       profile: document.querySelector(`[name="profile_${i}"]`).value,
       level: document.querySelector(`[name="level_${i}"]`).value,
-      gop: document.querySelector(`[name="gop_${i}"]`).value,
-      keyint_min: document.querySelector(`[name="keyint_min_${i}"]`).value,
+      gop: gop,
+      keyint_min: keyintMin,
       codec: "h264",
       pix_fmt: "yuv420p",
       fps_mode: "cfr"

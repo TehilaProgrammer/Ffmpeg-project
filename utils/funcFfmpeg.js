@@ -49,13 +49,6 @@ function generateFfmpegCommand(data) {
   const base = path.resolve(path.join(output_folder, sessionId));
   fs.mkdirSync(base, { recursive: true });
 
-  profiles.forEach((_, i) => {
-    const variantDir = path.join(base, `stream_${i}`);
-    fs.mkdirSync(variantDir, { recursive: true });
-  });
-
-  const streamDir = path.join(base, 'stream');
-  fs.mkdirSync(streamDir, { recursive: true });
 
   const args = [
     '-y', '-v', 'warning',
