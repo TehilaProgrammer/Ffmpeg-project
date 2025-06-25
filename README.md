@@ -33,7 +33,8 @@ Ideal for users creating **HLS streams**, transcoding video, or experimenting wi
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/ffmpeg-command-generator.git
+
+git clone https://github.com/TehilaProgrammer/ffmpeg-command-generator.git
 cd ffmpeg-command-generator
 npm install
 
