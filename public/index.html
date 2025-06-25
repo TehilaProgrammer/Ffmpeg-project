@@ -278,6 +278,7 @@
       <button type="submit">Generate Stream</button>
 
       <button type="button" onclick="buildFfmpegJson()">create JSON</button>
+      <button type="button" onclick="createFfmpegCommand()">Create FFmpeg Command</button>
     </form>
 
     <div id="videoContainer" style="display:none; margin-top: 20px;">
@@ -291,6 +292,9 @@
 
     <h2>Output JSON</h2>
     <pre id="outputJson"></pre>
+    <button type="button" id="copyCommandBtn" onclick="copyCommandToClipboard()" style="display:none; margin-top:10px;">
+      Copy Command
+    </button>
   </main>
 
   <script src="script.js"></script>

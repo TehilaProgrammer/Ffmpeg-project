@@ -1607,5 +1607,253 @@
         "fps_mode": "cfr"
       }
     ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-25T09_20_47_206",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750832409183fjbsixf6o",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "73842k",
+        "maxrate": "73842k",
+        "bufsize": "73842k",
+        "profile": "High",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-25T09_25_05_907",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750832409183fjbsixf6o",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "73842k",
+        "maxrate": "73842k",
+        "bufsize": "73842k",
+        "profile": "High",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-25T06_25_17_836Z",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750832409183fjbsixf6o",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "10000k",
+        "maxrate": "10000k",
+        "bufsize": "10000k",
+        "profile": "High",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-25T09_26_10_515",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750832409183fjbsixf6o",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "10000k",
+        "maxrate": "10000k",
+        "bufsize": "10000k",
+        "profile": "High",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-25T09_34_20_882",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750833223583rudoggct1",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "10000k",
+        "maxrate": "10000k",
+        "bufsize": "10000k",
+        "profile": "High",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-25T09_37_43_628",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750833442017unuvliu1a",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "10000k",
+        "maxrate": "10000k",
+        "bufsize": "10000k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-25T09_42_31_887",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750833442017unuvliu1a",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "10000k",
+        "maxrate": "10000k",
+        "bufsize": "10000k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
+  },
+  {
+    "inputPath": "https://mkcf.dxmcdn.com/7a1b521e-36e5-479c-8f2f-ddbfa6caa5c0csnOPhigh.mp4",
+    "output_folder": "public/output/2025-06-25T09_45_05_922",
+    "adVolume": "-28",
+    "audio_rate": "48000",
+    "audio_bitrate": "128k",
+    "audio_profile": "aac_he",
+    "audio_codec": "aac",
+    "channel_mode": "stereo",
+    "preset": "veryfast",
+    "playlist_name": "playlist.m3u8",
+    "segment_name": "segment_%03d.ts",
+    "hls_time": "6",
+    "sessionId": "1750833442017unuvliu1a",
+    "profiles": [
+      {
+        "resolution": "1920x1080",
+        "fps": "50",
+        "bitrate": "10000k",
+        "maxrate": "10000k",
+        "bufsize": "10000k",
+        "profile": "Main",
+        "level": "3.1",
+        "gop": "100",
+        "keyint_min": "100",
+        "codec": "h264",
+        "pix_fmt": "yuv420p",
+        "fps_mode": "cfr"
+      }
+    ]
   }
 ]

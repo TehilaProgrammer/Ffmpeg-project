@@ -38,6 +38,8 @@ document.getElementById("choosePathBtn").addEventListener("click", function () {
 document.getElementById("ffmpegForm").addEventListener("submit", async function (e) {
   e.preventDefault();
 
+  if (!validateForm()) return;
+
   const formData = new FormData(this);
 
   const inputVideo = document.getElementById("inputFileVideo")?.files[0];
@@ -226,31 +228,24 @@ function addProfile() {
 
 //!!JSON building
 function buildFfmpegJson() {
+  const json = getFfmpegJsonFromForm();
+  document.getElementById("outputJson").textContent = JSON.stringify(json, null, 2);
+}
 
-  console.log("in build JSON");
-  console.log(profileCount);
-
-  // const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-
+function getFfmpegJsonFromForm() {
   const inputPath = document.getElementById("inputPathVideo").value.trim();
   const now = new Date();
   const outputFolder = `public/output/${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}T${now.getHours().toString().padStart(2, '0')}_${now.getMinutes().toString().padStart(2, '0')}_${now.getSeconds().toString().padStart(2, '0')}_${now.getMilliseconds()}`;
-  
   const profiles = [];
-
   for (let i = 0; i < profileCount; i++) {
-    // Get individual resolution width and height for each profile
     const width = document.querySelector(`[name="resolution_width_${i}"]`).value;
     const height = document.querySelector(`[name="resolution_height_${i}"]`).value;
     const resolution = `${width}x${height}`;
-    
-    // Get bitrate and set defaults for other values
     const bitrate = document.querySelector(`[name="bitrate_${i}"]`).value;
     const maxrate = document.querySelector(`[name="maxrate_${i}"]`).value || bitrate;
     const bufsize = document.querySelector(`[name="bufsize_${i}"]`).value || bitrate;
     const gop = document.querySelector(`[name="gop_${i}"]`).value || "100";
     const keyintMin = document.querySelector(`[name="keyint_min_${i}"]`).value || "100";
-    
     profiles.push({
       resolution: resolution,
       fps: document.querySelector(`[name="fps_${i}"]`).value,
@@ -266,8 +261,7 @@ function buildFfmpegJson() {
       fps_mode: "cfr"
     });
   }
-
-  const json = {
+  return {
     inputPath,
     output_folder: outputFolder,
     adVolume: document.getElementById("adVolume").value,
@@ -283,7 +277,106 @@ function buildFfmpegJson() {
     sessionId,
     profiles
   };
+}
 
-  console.log("Generated JSON:", json);
-  document.getElementById("outputJson").textContent = JSON.stringify(json, null, 2);
+function validateForm() {
+
+  if (profileCount === 0) {
+    alert("Please add at least one profile.");
+    return false;
+  }
+
+  for (let i = 0; i < profileCount; i++) {
+    const width = document.querySelector(`[name="resolution_width_${i}"]`).value;
+    const height = document.querySelector(`[name="resolution_height_${i}"]`).value;
+    const fps = document.querySelector(`[name="fps_${i}"]`).value;
+    const bitrate = document.querySelector(`[name="bitrate_${i}"]`).value;
+
+    if (!width || width < 1 || width > 7680) {
+      alert(`Profile #${i+1}: Width must be between 1 and 7680.`);
+      return false;
+    }
+    if (!height || height < 1 || height > 4320) {
+      alert(`Profile #${i+1}: Height must be between 1 and 4320.`);
+      return false;
+    }
+    if (!fps || fps < 1 || fps > 120) {
+      alert(`Profile #${i+1}: FPS must be between 1 and 120.`);
+      return false;
+    }
+    if (!bitrate || bitrate < 100 || bitrate > 10000) {
+      alert(`Profile #${i+1}: Bitrate must be between 100 and 10000 kbps.`);
+      return false;
+    }
+  }
+
+  const audioRate = document.getElementById("audioRate").value;
+  if (!audioRate || audioRate < 8000 || audioRate > 192000) {
+    alert("Audio rate must be between 8000 and 192000.");
+    return false;
+  }
+  const audioBitrate = document.getElementById("audioBitrate").value;
+  if (!audioBitrate || audioBitrate < 32 || audioBitrate > 512) {
+    alert("Audio bitrate must be between 32 and 512 kbps.");
+    return false;
+  }
+
+  const playlistName = document.getElementById("playlistName").value;
+  const segmentName = document.getElementById("segmentName").value;
+  const invalidNamePattern = /[\\/:*?"<>|]/;
+  if (!playlistName || invalidNamePattern.test(playlistName)) {
+    alert("Playlist name is required and cannot contain special characters \\ / : * ? \" < > |");
+    return false;
+  }
+  if (!segmentName || invalidNamePattern.test(segmentName)) {
+    alert("Segment name is required and cannot contain special characters \\ / : * ? \" < > |");
+    return false;
+  }
+
+  const hlsTime = document.getElementById("hlsTime").value;
+  if (!hlsTime || hlsTime < 1 || hlsTime > 60) {
+    alert("HLS Time must be between 1 and 60 seconds.");
+    return false;
+  }
+
+  return true; 
+}
+
+async function createFfmpegCommand() {
+  const json = getFfmpegJsonFromForm();
+  try {
+    const response = await fetch("/api/generate-command", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(json),
+    });
+    const result = await response.json();
+    if (result.ffmpegCmd) {
+      document.getElementById("outputJson").textContent = result.ffmpegCmd;
+      document.getElementById("copyCommandBtn").style.display = "inline-block";
+    } else {
+      document.getElementById("outputJson").textContent = "Error: " + (result.error || "Unknown error");
+      document.getElementById("copyCommandBtn").style.display = "none";
+    }
+  } catch (err) {
+    document.getElementById("outputJson").textContent = "Error: " + err.message;
+  }
+}
+
+function copyCommandToClipboard() {
+  const output = document.getElementById("outputJson").textContent;
+  if (!output.trim()) {
+    alert("Nothing to copy!");
+    return;
+  }
+  navigator.clipboard.writeText(output)
+    .then(() => {
+      // Optional: Give user feedback
+      const btn = document.getElementById("copyCommandBtn");
+      btn.textContent = "Copied!";
+      setTimeout(() => { btn.textContent = "Copy Command"; }, 1500);
+    })
+    .catch(err => {
+      alert("Failed to copy: " + err);
+    });
 }
