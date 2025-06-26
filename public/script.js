@@ -226,10 +226,33 @@ function addProfile() {
   profileCount++;
 }
 
-//!!JSON building
 function buildFfmpegJson() {
   const json = getFfmpegJsonFromForm();
   document.getElementById("outputJson").textContent = JSON.stringify(json, null, 2);
+  convertFunction(json)
+}
+
+async function convertFunction(json) {
+  console.log("before - json",json);
+  try {
+    const response = await fetch('/convert', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(json)
+    });
+
+    if (!response.ok) {
+      throw new Error('Server error: ' + response.status);
+    }
+
+    const converted = await response.json(); // התוצאה מהשרת
+    console.log("after - converted", converted);
+
+  } catch (err) {
+    console.error("Error converting JSON:", err);
+  }
 }
 
 function getFfmpegJsonFromForm() {

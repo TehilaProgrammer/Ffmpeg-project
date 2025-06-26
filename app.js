@@ -9,20 +9,17 @@ const fs = require('fs');
 const PORT=process.env.PORT||"3000";
 app.use(express.json());
 
-
 app.get('/output/:timestamp/:filename', (req, res) => {
   const { timestamp,  filename } = req.params;
   console.log('Download request params:', { timestamp, filename });
   
   const zipPath = path.join(__dirname, 'public', 'output', timestamp, filename);
   console.log('Attempting to serve zip file:', zipPath);
-  
  
   if (!timestamp  || !filename) {
     console.error('Invalid request parameters:', req.params);
     return res.status(400).json({ error: 'Invalid request parameters' });
   }
-  
 
   if (!fs.existsSync(zipPath)) {
     console.error('Zip file not found:', zipPath);

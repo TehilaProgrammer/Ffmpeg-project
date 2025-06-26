@@ -10,7 +10,7 @@ router.post('/api/upload', upload.single('inputVideo'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
-
+    
   const uploadedPath = req.file.path;
   res.json({ inputPath: uploadedPath });
 });
