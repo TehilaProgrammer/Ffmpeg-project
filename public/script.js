@@ -214,7 +214,7 @@ function addProfile() {
       </label>
 
       <label>Bitrate (kbps):
-        <input type="number" name="bitrate_${profileCount}" required min="100" max="10000" placeholder="Enter bitrate">
+        <input type="number" name="bitrate_${profileCount}" required min="100" max="1000000" placeholder="Enter bitrate">
       </label>
 
       <input type="hidden" name="maxrate_${profileCount}" value="">
@@ -229,6 +229,7 @@ function addProfile() {
 function buildFfmpegJson() {
   const json = getFfmpegJsonFromForm();
   document.getElementById("outputJson").textContent = JSON.stringify(json, null, 2);
+  console.log(JSON.stringify(json, null, 2));
   convertFunction(json)
 }
 
@@ -247,8 +248,11 @@ async function convertFunction(json) {
       throw new Error('Server error: ' + response.status);
     }
 
+    console.log("response",response);
+    
     const converted = await response.json(); // התוצאה מהשרת
     console.log("after - converted", converted);
+    console.log("afterrrrrrr",JSON.stringify(converted, null, 2));
 
   } catch (err) {
     console.error("Error converting JSON:", err);
