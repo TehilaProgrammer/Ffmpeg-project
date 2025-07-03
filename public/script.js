@@ -84,8 +84,7 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
     const bitrate = document.querySelector(`[name="bitrate_${i}"]`).value;
     const maxrate = document.querySelector(`[name="maxrate_${i}"]`).value || bitrate;
     const bufsize = document.querySelector(`[name="bufsize_${i}"]`).value || bitrate;
-    const gop = document.querySelector(`[name="gop_${i}"]`).value || "100";
-    const keyintMin = document.querySelector(`[name="keyint_min_${i}"]`).value || "100";
+    const keyintMin = document.querySelector(`[name="keyint_min_${i}"]`).value;
     
     profiles.push({
       resolution: resolution,
@@ -95,7 +94,6 @@ document.getElementById("ffmpegForm").addEventListener("submit", async function 
       bufsize: bufsize + "k",
       profile: document.querySelector(`[name="profile_${i}"]`).value,
       level: document.querySelector(`[name="level_${i}"]`).value,
-      gop: gop,
       keyint_min: keyintMin,
       codec: "h264",
       pix_fmt: "yuv420p",
@@ -219,7 +217,6 @@ function addProfile() {
 
       <input type="hidden" name="maxrate_${profileCount}" value="">
       <input type="hidden" name="bufsize_${profileCount}" value="">
-      <input type="hidden" name="gop_${profileCount}" value="100">
       <input type="hidden" name="keyint_min_${profileCount}" value="100">
     </fieldset>`;
   container.insertAdjacentHTML("beforeend", html);
@@ -271,8 +268,7 @@ function getFfmpegJsonFromForm() {
     const bitrate = document.querySelector(`[name="bitrate_${i}"]`).value;
     const maxrate = document.querySelector(`[name="maxrate_${i}"]`).value || bitrate;
     const bufsize = document.querySelector(`[name="bufsize_${i}"]`).value || bitrate;
-    const gop = document.querySelector(`[name="gop_${i}"]`).value || "100";
-    const keyintMin = document.querySelector(`[name="keyint_min_${i}"]`).value || "100";
+    const keyintMin = document.querySelector(`[name="keyint_min_${i}"]`).value ;
     profiles.push({
       resolution: resolution,
       fps: document.querySelector(`[name="fps_${i}"]`).value,
@@ -281,7 +277,6 @@ function getFfmpegJsonFromForm() {
       bufsize: bufsize + "k",
       profile: document.querySelector(`[name="profile_${i}"]`).value,
       level: document.querySelector(`[name="level_${i}"]`).value,
-      gop: gop,
       keyint_min: keyintMin,
       codec: "h264",
       pix_fmt: "yuv420p",

@@ -45,7 +45,6 @@ function generateFfmpegCommand(data) {
   if (!profiles || !profiles.length)
     throw new Error("No video profiles provided.");
 
-  const gop = fps * hls_time;
   const base = path.resolve(path.join(output_folder, sessionId));
   fs.mkdirSync(base, { recursive: true });
 
@@ -53,49 +52,49 @@ function generateFfmpegCommand(data) {
   const args = [
     '-y', '-v', 'warning',
     '-i', inputPath,
-    '-threads', '0', '-max_muxing_queue_size', '256',
-    '-max_alloc', '536870912', '-bufsize', '1M', '-maxrate', '1M',
-    '-af', `loudnorm=I=${adVolume}:LRA=2:TP=-2.5,aresample=async=1`
+    '-af', `loudnorm=I=${adVolume}:LRA=2:TP=-2.5`
   ];
 
   let fc = `[0:v]split=${profiles.length}`;
-  profiles.forEach((_, i) => fc += `[v${i}]`);
+  profiles.forEach((_, i) => fc += `[v${i + 1}]`);
   fc += ';';
   profiles.forEach((p, i) => {
     const [w, h] = p.resolution.split('x');
-    fc += `[v${i}]scale=${w}:${h}:force_original_aspect_ratio=decrease,` +
-      `fps=${p.fps},pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2[v${i}out];`;
+    fc += `[v${i + 1}]scale=${w}:${h}:force_original_aspect_ratio=decrease,` +
+      `fps=${p.fps},pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2[v${i + 1}out];`;
   });
   args.push('-filter_complex', fc.slice(0, -1));
 
   // מיפוי סטרימים
   profiles.forEach((p, i) => {
     args.push(
-      '-map', `[v${i}out]`,
-      `-c:v:${i}`, 'libx264',
+      '-map', `[v${i + 1}out]`,
+      `-c:v:${i}`, p.codec_name || 'h264',
       `-pix_fmt:v:${i}`, 'yuv420p',
-      `-profile:v:${i}`, 'baseline',
+      `-profile:v:${i}`, p.profile,
       `-b:v:${i}`, p.bitrate,
       `-maxrate:v:${i}`, p.maxrate,
       `-bufsize:v:${i}`, p.bufsize,
+      '-fps_mode', 'cfr',
+      '-g', (p.fps * hls_time).toString(),
+      '-keyint_min', p.keyint_min,
+      `-level:v:${i}`, p.level,
       '-preset', preset || 'ultrafast',
-      '-tune', 'zerolatency',
-      '-g', p.gop || gop,
-      '-keyint_min', p.keyint_min || gop,
 
-      '-map', '0:a:0',
+      '-map', '0:a:0?',
       `-c:a:${i}`, audio_codec || 'aac',
-      `-ar:${i}`, audio_rate || '44100',
+      `-ar`, audio_rate || '44100',
       `-b:a:${i}`, audio_bitrate || '96k'
     );
   });
 
   args.push(
+    '-async', '1',
     '-f', 'hls',
+    '-force_key_frames',
+    `expr:gte(t,n_forced*${hls_time})`,
     '-hls_time', `${hls_time}`,
-    '-hls_list_size', '0',
-    '-hls_segment_type', 'mpegts',
-    '-hls_flags', 'independent_segments',
+    '-avoid_negative_ts', 'make_zero',
     '-hls_playlist_type', 'vod',
     '-hls_segment_filename', path.join(base, 'stream_%v_%03d.ts'),
     '-master_pl_name', 'master.m3u8',

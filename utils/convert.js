@@ -23,7 +23,7 @@ function convertJson(input) {
               pix_fmt: profile.pix_fmt,
               level: parseFloat(profile.level) * 10,
               tags: {
-                variant_bitrate: parseInt(profile.bitrate) * 8
+                variant_bitrate: parseInt(profile.bitrate) 
               }
             },
             {
@@ -32,7 +32,7 @@ function convertJson(input) {
               sample_rate: input.audio_rate,
               codec_type: "audio",
               tags: {
-                variant_bitrate: parseInt(input.audio_bitrate) * 8
+                variant_bitrate: parseInt(input.audio_bitrate)
               }
             }
           ]
