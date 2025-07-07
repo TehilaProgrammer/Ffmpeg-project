@@ -9,7 +9,7 @@ function convertJson(input) {
         },
         programs: input.profiles.map((profile, index) => ({
           tags: {
-            variant_bitrate: parseInt(profile.bitrate) * 8 // bitrate in bps
+            variant_bitrate: parseInt(profile.bitrate)
           },
           streams: [
             {

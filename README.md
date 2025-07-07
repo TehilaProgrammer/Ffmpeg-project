@@ -1,95 +1,189 @@
-# FFmpeg Command Generator
+# Manual Transcoding - FFmpeg Stream Generator
 
-A web-based tool for generating and running advanced FFmpeg commands for video streaming and conversion.
-
-This project provides a **user-friendly interface** to build complex FFmpeg commands, preview them, and (optionally) run them on the server.  
-Ideal for users creating **HLS streams**, transcoding video, or experimenting with FFmpeg options — without memorizing command-line syntax.
-
----
+A web-based application for generating HLS (HTTP Live Streaming) streams from video files using FFmpeg. This tool provides an intuitive interface for configuring video transcoding parameters and generating multiple quality profiles for adaptive streaming.
 
 ## Features
 
-- **Interactive Web Form** – Set video/audio options, profiles, and advanced FFmpeg settings  
-- **Multiple Video Profiles** – Add various resolutions/bitrates for adaptive streaming  
-- **JSON Preview** – See the exact configuration sent to the backend  
-- **FFmpeg Command Preview** – View the full FFmpeg command before running it  
-- **Copy to Clipboard** – One-click copy of the command for terminal use  
-- **Upload File / Input Path** – Choose to upload a file or enter a server path  
-- **Form Validation** – Prevent errors with built-in validation checks  
-- **(Optional) Run on Server** – Submit and process jobs server-side  
-- **Live Status Updates** – Real-time feedback via server-sent events  
-- **Download Output** – Get processed files as a ZIP archive  
-- **HLS Playback** – Preview the output stream in-browser  
+- **Web-based Interface**: User-friendly HTML interface for configuring transcoding parameters
+- **Multiple Input Methods**: Upload video files or specify file paths
+- **Multi-Profile Support**: Generate multiple quality profiles (resolutions, bitrates, codecs)
+- **HLS Streaming**: Output HLS-compatible streams with master playlist
+- **Audio Processing**: Configurable audio parameters (volume, bitrate, codec, channels)
+- **Real-time Status**: Monitor transcoding progress
+- **Download Output**: Automatically package results in ZIP format
+- **JSON Configuration**: Export/import transcoding configurations
 
----
+## Prerequisites
 
-## Getting Started
+- **Node.js** (v14 or higher)
+- **FFmpeg** installed and available in system PATH
+- **npm** or **yarn** package manager
 
-### Prerequisites
+### Installing FFmpeg
 
-- Node.js (v14+ recommended)  
-- FFmpeg installed and available in system `PATH`  
-
-### Installation
-
+#### Windows
 ```bash
+choco install ffmpeg
+```
 
-git clone https://github.com/TehilaProgrammer/ffmpeg-command-generator.git
-cd ffmpeg-command-generator
-npm install
+#### macOS
+```bash
+brew install ffmpeg
+```
+
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+## Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd manual_transcoding
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the application**
+   ```bash
+   # Development mode with auto-restart
+   npm run dev
+   
+   # Production mode
+   npm start
+   ```
+
+4. **Access the application**
+   Open your browser and navigate to `http://localhost:3000`
+
+## Usage
+
+### Basic Workflow
+
+1. **Choose Input Method**
+   - Click "Upload File" to upload a video file directly
+   - Click "Use File Path" to specify a path to an existing video file
+
+2. **Configure Audio Settings**
+   - **Ad Volume**: Audio normalization level (default: -28)
+   - **Audio Rate**: Sample rate in Hz (default: 48000)
+   - **Audio Bitrate**: Audio bitrate in kbps (default: 128)
+   - **Audio Profile**: Choose between AAC HE or AAC Low
+   - **Audio Codec**: Select AAC or MP3
+   - **Channel Mode**: Stereo or Mono
+
+3. **Configure Video Settings**
+   - **Preset**: FFmpeg encoding preset (default: veryfast)
+   - **Playlist Name**: Name for the master playlist
+   - **Segment Name**: Name for video segments
+   - **HLS Time**: Segment duration in seconds (default: 6)
+
+4. **Add Video Profiles**
+   - Click "+ Add Profile" to add quality profiles
+   - Configure resolution, bitrate, codec, and other parameters for each profile
+   - Multiple profiles enable adaptive streaming
+
+5. **Generate Stream**
+   - Click "Generate Stream" to start transcoding
+   - Monitor progress in the status section
+   - Download the ZIP file containing all output files when complete
+
+### Advanced Features
+
+- **JSON Export**: Click "create JSON" to export current configuration
+- **FFmpeg Command**: Click "Create FFmpeg Command" to view the generated FFmpeg command
+- **Configuration History**: Previous configurations are automatically saved
+
+## Project Structure
 
 ```
-##  Run the App
-
-```bash
-npm start
+manual_transcoding/
+├── app.js                 # Main Express server
+├── package.json           # Dependencies and scripts
+├── public/                # Static web assets
+│   ├── index.html         # Main web interface
+│   ├── script.js          # Frontend JavaScript
+│   ├── images/            # UI images
+│   └── output/            # Generated output files
+├── routers/               # API route handlers
+│   ├── config_route.js    # Route configuration
+│   ├── convertJsonToFfmpegCommand.js
+│   ├── convertJsonToFfmpegCommandUpload.js
+│   ├── convertToRealJson.js
+│   ├── generateFfmpegCommandForClient.js
+│   └── status.js          # Status monitoring
+├── utils/                 # Utility functions
+│   ├── funcFfmpeg.js      # FFmpeg command generation
+│   ├── convert.js         # Conversion utilities
+│   └── statusManager.js   # Status management
+└── uploads/               # Temporary upload directory
 ```
-Visit http://localhost:3000 in your browser.
 
+## Configuration
 
+### FFmpeg Parameters
 
-Usage:
+The application supports various FFmpeg parameters:
 
--Choose a video file or provide a path
+- **Video Codecs**: H.264, H.265, VP9
+- **Audio Codecs**: AAC, MP3, Opus
+- **Profiles**: Baseline, Main, High
+- **Presets**: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
 
--Fill in audio/video settings
+## Output Format
 
--Add one or more output profiles
+The application generates HLS-compatible output:
 
--Click Create JSON or Create FFmpeg Command
+- **Master Playlist**: `master.m3u8` containing all quality variants
+- **Segment Files**: `.ts` files for each quality level
+- **Individual Playlists**: Separate `.m3u8` files for each quality level
+- **ZIP Archive**: All files packaged for easy download
 
--Use Copy Command to copy it
+## Troubleshooting
 
--(Optional) Click Generate Stream to run and download results
+### Common Issues
 
+1. **FFmpeg not found**
+   - Ensure FFmpeg is installed and in your system PATH
+   - Test with `ffmpeg -version` in terminal
 
-Project Structure
+2. **Permission errors**
+   - Check write permissions for output directories
+   - Ensure the application has access to upload and output folders
 
-public/ – Static frontend files
+3. **Large file uploads**
+   - Increase upload limits in Express configuration
+   - Consider using file paths for very large files
 
-routers/ – Express route handlers
+4. **Memory issues**
+   - Reduce video quality or resolution
+   - Process shorter video segments
 
-utils/ – FFmpeg generation and helpers
+### Logs
 
-app.js – Main Express server
+Check the console output for detailed error messages and processing status.
 
-package.json – Project dependencies
+## Contributing
 
-Customization & Extensions
-Add more FFmpeg options by editing the form/backend
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Add authentication to save user jobs/history
+## License
 
-Enable batch processing for multiple files
+This project is licensed under the ISC License.
 
-Create presets for common use-cases (e.g., "YouTube 1080p")
+## Version History
 
-License
-This project is for educational and personal use.
-Feel free to modify and adapt it to your needs!
-
-Credits
-Built with Node.js, Express, and FFmpeg.
-UI inspired by modern streaming tools.
-
-
+- **v1.0.0**: Initial release with basic transcoding functionality
+- Multi-profile support
+- HLS streaming output
+- Web-based interface

@@ -6,7 +6,7 @@ const path=require("path");
 const{routesInit}=require("./routers/config_route")
 const app=express();
 const fs = require('fs');
-const PORT=process.env.PORT||"3000";
+const PORT="3000";
 app.use(express.json());
 
 app.get('/output/:timestamp/:filename', (req, res) => {
