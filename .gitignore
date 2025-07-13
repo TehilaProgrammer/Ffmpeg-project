@@ -8,6 +8,7 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 utils/last_used_data.json
+utils/convert.js
 
 # uploads or temp files
 uploads/
